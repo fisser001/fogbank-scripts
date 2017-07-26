@@ -2,8 +2,8 @@ import matplotlib.pylab as plt
 from matplotlib.ticker import ScalarFormatter
 from collections import OrderedDict
 import os
-import glob
 from textwrap import wrap
+import sys
 
 """
 Read in the csv. Each row is appended to a list.
@@ -122,11 +122,18 @@ def plot_all(data, graph_title, y_axis_label, graph_filename):
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     fig.savefig(graph_filename, dpi=300, bbox_extra_artists=(title,legend,), bbox_inches='tight')
 
+def get_subdirectories(path):
+    subdirectories = []
+    for filename in os.listdir(path):
+        if os.path.isdir(os.path.join(path, filename)):
+            subdirectories.append(filename)
+    return subdirectories
+
 """
 Generate graphs using the data from the subdirectories of the given one
 """
 def generate_graph(directory, graph_title):
-    directories = sorted(glob.glob(directory+"/*/")) #get the subdirectories
+    directories = sorted(get_subdirectories(directory))
     data_to_process = [
                     ("bytes_in", "Mbps transmitted by nodes"),
                     ("bytes_out", "Mbps received by nodes"),
@@ -138,7 +145,7 @@ def generate_graph(directory, graph_title):
         data = []
         for dir_path in directories:
             #read in the csv file into a list
-            csv_rows = read_csv(os.path.join(dir_path, "indv_ports_" + measurement + ".csv"))
+            csv_rows = read_csv(os.path.join(directory,dir_path, "indv_ports_" + measurement + ".csv"))
             if "bytes" in measurement:
                 port_info = split_ports(csv_rows,True)
             else:
@@ -146,3 +153,6 @@ def generate_graph(directory, graph_title):
             data.append(port_info)
 
         plot_all(data, graph_title, y_axis_label, os.path.join(directory, measurement + ".png"))
+
+if __name__ == "__main__":
+    generate_graph(sys.argv[1], sys.argv[2])
