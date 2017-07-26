@@ -6,6 +6,12 @@ import pytz
 import glob
 from generate_graphs import generate_graph
 
+"""
+Convert time from NZ time to UTC.
+time_to_convert must be a string of format %Y-%m-%d-%H:%M:%S
+e.g. 2017-07-07-10:30:40
+Returns a string of format %Y-%m-%d %H:%M:%S
+"""
 def convert_to_UTC(time_to_convert):
     local = pytz.timezone ("NZ")
     time_to_convert = datetime.datetime.strptime(time_to_convert,"%Y-%m-%d-%H:%M:%S")
@@ -96,6 +102,7 @@ def run_hive_query(repetition, hive_query, graph_title):
     current_time = time.strftime("%Y-%m-%d-%H:%M:%S")
     directory_name = os.path.join(sys.path[0], "logs", current_time)
     os.makedirs(directory_name)
+    print "Saving to " + directory_name
 
     for i in range(0,repetition):
         print "Starting hive query #" + str(i)
