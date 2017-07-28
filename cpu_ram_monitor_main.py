@@ -27,10 +27,31 @@ class HTTPHandler(BaseHTTPRequestHandler):
 
         if self.path == paths[0]:
             self.modify_monitoring(paths[0])
+            monitoring_active = True
+            t = Thread(target=self.monitor)
         else if self.path == paths[1]:
             self.modify_monitoring(paths[1])
+            monitoring_active = False
         else:
-            #put stats into influx
+            # check if received data is JSON
+            if ctype != 'application/json':
+                self._set_headers(400, 'text/html')
+                self.wfile.write('POST data is not a JSON object.\n')
+                return
+
+            #parse the JSON object
+            content_length = int(self.headers.getheader('content-length'))
+            post_data = self.rfile.read(content_length)
+            self.write_stats(json.loads(post_data))
+        
+        self._set_headers(200,'text/html')
+        self.wfile.write('Success')
+
+    def write_stats(self, client, content):
+        data = "monitoring_data,host=" + client
+        data += ",".join(["{}={}".format(key, value) for (key, value) in content.items()])
+        influx_url = "http://localhost:8086?db=mlab"
+        requests.post(influx_url, data=data)
 
     def modify_monitoring(self, path):
         slaves_file = os.path.join(os.environ["HADOOP_HOME"], "etc", "hadoop", "slaves")
@@ -45,7 +66,6 @@ class HTTPHandler(BaseHTTPRequestHandler):
             t = Thread(target=self.send_start_request, args=(slave,path,))
             t.start()
 
-
     def send_start_request(self, slave, path):
         requests.post(slave+ ":12345" + path)
     
@@ -54,11 +74,11 @@ class HTTPHandler(BaseHTTPRequestHandler):
             #get CPU, RAM, and harddisk stats
             stats = {}
             stats["cpu_percent"] = psutil.cpu_percent()
-            stats["virt_mem"] = psutil.virtual_memory().percent
+            stats["virtual_memory"] = psutil.virtual_memory().percent
             stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
+            self.write_stats(os.uname()[1],stats)
             time.sleep(10)
 
-#os.uname()[1]
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 

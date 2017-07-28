@@ -35,7 +35,6 @@ class HTTPHandler(BaseHTTPRequestHandler):
             t.start()
 
         else:
-            #stop monitoring
             monitoring_active = False
 
         self._set_headers(200,'text/html')
@@ -46,7 +45,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
             #get CPU, RAM, and harddisk stats
             stats = {}
             stats["cpu_percent"] = psutil.cpu_percent()
-            stats["virt_mem"] = psutil.virtual_memory().percent
+            stats["virtual_memory"] = psutil.virtual_memory().percent
             stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
 
             #send to main server
