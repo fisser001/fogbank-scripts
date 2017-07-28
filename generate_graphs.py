@@ -93,11 +93,20 @@ def plot_all(data, graph_title, y_axis_label, graph_filename):
     fig, axlist = plt.subplots(dimension[0], dimension[1], figsize = (dimension[1]*4,dimension[0]*4))
     #the original axlist is a list of lists. This coverts it to just a list
     axlist = axlist.flatten()
+
+    #check that there aren't going to be any empty subplots
+    difference =  (dimension[0] * dimension[1]) - len(data)
+    #if there are empty subplots, reduce the number of subplots
+    for count in range(difference,0, -1):
+        fig.delaxes(axlist[0])
+
+    #update the ax list in case we deleted some subplots
+    axlist = fig.axes
+
     #dont use scientific notation
     y_formatter = ScalarFormatter(useOffset=False)
     y_formatter.set_scientific(False)
     
-
     i = 0
     for d in data:
         #get a subplot to draw in
@@ -153,6 +162,7 @@ def generate_graph(directory, graph_title):
             data.append(port_info)
 
         plot_all(data, graph_title, y_axis_label, os.path.join(directory, measurement + ".png"))
+
 
 if __name__ == "__main__":
     generate_graph(sys.argv[1], sys.argv[2])
