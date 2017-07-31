@@ -47,7 +47,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
             stats = {}
             stats["cpu_percent"] = psutil.cpu_percent()
             stats["virtual_memory"] = psutil.virtual_memory().percent
-            stats["disk_usage"] = psutil.disk_usage("/").percent
+            stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
 
             #send to main server
             url = "http://{}:{}/push-stats".format(main_server,PORT)
