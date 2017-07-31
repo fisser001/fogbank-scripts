@@ -18,6 +18,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
         self.end_headers()
    
     def do_POST(self):
+        global monitoring_active
         #check path
         if not self.path in paths:
             self._set_headers(404, 'text/html')
@@ -31,7 +32,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 return     
             
             monitoring_active = True
-            t = Thread(target=self.monitor, args=(self.client_address,))
+            t = Thread(target=self.monitor, args=(self.client_address[0],))
             t.start()
 
         else:
@@ -46,10 +47,10 @@ class HTTPHandler(BaseHTTPRequestHandler):
             stats = {}
             stats["cpu_percent"] = psutil.cpu_percent()
             stats["virtual_memory"] = psutil.virtual_memory().percent
-            stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
+            stats["disk_usage"] = psutil.disk_usage("/").percent
 
             #send to main server
-            url = "{}:{}/push-stats".format(main_server[0], main_server[1])
+            url = "http://{}:{}/push-stats".format(main_server,PORT)
             headers = {'content-type': 'application/json'}
             requests.post(url,data=json.dumps(stats), headers=headers)
             time.sleep(10)
