@@ -4,6 +4,7 @@ import time
 import datetime
 import pytz
 import glob
+import requests
 from generate_graphs import generate_graph
 
 """
@@ -30,18 +31,23 @@ def create_csv(start_time, end_time, directory, db_name):
     start_time = convert_to_UTC(start_time)
     end_time = convert_to_UTC(end_time)
 
-    commands = ["bytes_in", "bytes_out", "packets_in", "packets_out"]
-    for com in commands:
-        cmd = "influx -database '"+ db_name  +"' -execute \"SELECT derivative(sum(value),1s) FROM "+ com +" WHERE time > '"+ start_time +"' and time < '"+ end_time +"' group by time(1s) \" -format 'csv' > " + directory + "/all_ports_"+ com + ".csv"
+    network_stats = ["bytes_in", "bytes_out", "packets_in", "packets_out"]
+    for netstat in network_stats:
+        cmd = "influx -database '"+ db_name  +"' -execute \"SELECT derivative(sum(value),1s) FROM "+ netstat +" WHERE time > '"+ start_time +"' and time < '"+ end_time +"' group by time(1s) \" -format 'csv' > " + directory + "/all_ports_"+ netstat + ".csv"
         os.system(cmd)
-        cmd = "influx -database '"+ db_name  +"' -execute \"SELECT derivative(sum(value),1s) FROM "+ com +" WHERE time > '"+ start_time +"' and time < '"+ end_time +"' group by time(1s),port_name \" -format 'csv' > "  + directory + "/indv_ports_" + com + ".csv"
+        cmd = "influx -database '"+ db_name  +"' -execute \"SELECT derivative(sum(value),1s) FROM "+ netstat +" WHERE time > '"+ start_time +"' and time < '"+ end_time +"' group by time(1s),port_name \" -format 'csv' > "  + directory + "/indv_ports_" + netstat + ".csv"
+        os.system(cmd)
+
+    node_stats = ["cpu_percent", "disk_usage", "virtual_memory"]
+    for nstat in node_stats:
+        cmd = "influx -database '"+ db_name  +"' -execute \"SELECT * FROM "+ nstat +" WHERE time > '"+ start_time +"' and time < '"+ end_time +"' group by host \" -format 'csv' > "  + directory + "/indv_ports_"+ nstat + ".csv"
         os.system(cmd)
 
 """
 Check if string is required in the file. Returns false if the string is the header
 """
 def isRequired(line):
-    return line.strip() != "name,tags,time,derivative"
+    return not(line.startswith("name,tags"))
 
 """
 Modified from https://stackoverflow.com/a/4469969
@@ -62,6 +68,12 @@ def remove_headers(filename):
     writeLoc = 0
     readLoc = 0
     with open( filename , "r+" ) as f:
+        line = f.readline()
+        readLoc = f.tell()
+        f.seek( writeLoc )
+        f.write( line )
+        writeLoc = f.tell()
+        f.seek( readLoc )
         while True:
             line = f.readline()
 
@@ -72,19 +84,19 @@ def remove_headers(filename):
             #save how far we've read
             readLoc = f.tell()
 
-            #check if we're at the first header, if so write it & carry on
-            if readLoc == 26: 
-                f.seek( writeLoc )
-                f.write( line )
-                writeLoc = f.tell()
-                f.seek( readLoc )
-                continue
+            # #check if we're at the first header, if so write it & carry on
+            # if readLoc == 26: 
+            #     f.seek( writeLoc )
+            #     f.write( line )
+            #     writeLoc = f.tell()
+            #     f.seek( readLoc )
+            #     continue
             
             #if we need this line write it and
             #update the write location
             if isRequired(line):
                 mylist = line.split(',')
-                mylist[1] = mylist[1][10:] #remove the "port_name=" of the second column
+                mylist[1] = mylist[1].split('=')[1] #remove the "port_name=" of the second column
                 line = ','.join(mylist)
                 f.seek( writeLoc )
                 f.write( line )
@@ -103,6 +115,8 @@ def run_hive_query(repetition, hive_query, graph_title):
     directory_name = os.path.join(sys.path[0], "logs", current_time)
     os.makedirs(directory_name)
     print "Saving to " + directory_name
+
+    requests.post("http://localhost:12345/start-monitoring")
 
     for i in range(0,repetition):
         print "Starting hive query #" + str(i)
@@ -128,6 +142,7 @@ def run_hive_query(repetition, hive_query, graph_title):
             print "Sleeping..."
             time.sleep(30) #let the network calm down before repeating the query
 
+    requests.post("http://localhost:12345/end-monitoring")
     #generate graphs
     print "Generating graphs"
     generate_graph(directory_name, graph_title) #directory, graph_title
