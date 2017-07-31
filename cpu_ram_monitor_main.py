@@ -55,10 +55,10 @@ class HTTPHandler(BaseHTTPRequestHandler):
         self.wfile.write('Success')
 
     def write_stats(self, client, content):
-        data = "monitoring_data,host={} ".format(client)
-        data += ",".join(["{}={}".format(key, value) for (key, value) in content.items()])
-        influx_url = "http://localhost:8086/write?db=mlab"
-        r = requests.post(influx_url, data=data)
+        for key, value in content.items():
+            data = "{},host={} value={}".format(key,client,value)
+            influx_url = "http://localhost:8086/write?db=mlab"
+            r = requests.post(influx_url, data=data)
 
 
     def modify_monitoring(self, path):
