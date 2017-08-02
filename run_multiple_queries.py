@@ -83,14 +83,6 @@ def remove_headers(filename):
 
             #save how far we've read
             readLoc = f.tell()
-
-            # #check if we're at the first header, if so write it & carry on
-            # if readLoc == 26: 
-            #     f.seek( writeLoc )
-            #     f.write( line )
-            #     writeLoc = f.tell()
-            #     f.seek( readLoc )
-            #     continue
             
             #if we need this line write it and
             #update the write location
