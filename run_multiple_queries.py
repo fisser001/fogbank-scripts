@@ -107,6 +107,8 @@ def run_hive_query(repetition, hive_query, graph_title):
     directory_name = os.path.join(sys.path[0], "logs", current_time)
     os.makedirs(directory_name)
     print "Saving to " + directory_name
+    with open( os.path.join(directory_name, "query.txt") , "w" ) as f:
+        f.write(hive_query)
 
     requests.post("http://localhost:12345/start-monitoring")
 
@@ -115,13 +117,14 @@ def run_hive_query(repetition, hive_query, graph_title):
         dir_name = os.path.join(directory_name,format(i, '03')) #pad number to use 3 characters e.g. 0 becomes 000.
         os.makedirs(dir_name)
         
-        
         start_time = time.strftime("%Y-%m-%d-%H:%M:%S")
         #run hive query and pipe stdout and stderr to log.txt
         final_query = "beeline -u jdbc:hive2:// -e \"" + hive_query + "\" --incremental=true > " + dir_name + "/log.txt 2>&1" 
         os.system(final_query)
         end_time = time.strftime("%Y-%m-%d-%H:%M:%S")
         
+        with open( os.path.join(dir_name, "time.txt") , "w" ) as f:
+            f.write(start_time + "\n" + end_time)
         #create csv by querying influx
         print "Generating csv files"
         create_csv(start_time, end_time, dir_name, "mlab")
