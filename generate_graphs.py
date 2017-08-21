@@ -5,8 +5,9 @@ import os
 from textwrap import wrap
 import sys
 
-
+#colours to use for the graphs
 colours = ["#e6194b","#3cb44b","#ffe119", "#f58231", "#911eb4", "#46f0f0", "#000080", "#aa6e28", "#800000", "#808080", "#fabebe"]
+
 """
 Read in the csv. Each row is appended to a list.
 Measurements for ports 12-26 are discarded since these
@@ -85,18 +86,31 @@ def generate_subplot_dimension(total_size):
     #not divisible
     return ((total_size/2)+1, 2)
 
+"""
+Gets the colour for the node for non-port stats. This gets confusing
+because in the port stats, the master (elf-cluster or port11)
+is the third element in the list, and so gets the 3rd colour. 
+However in the non-port stats list, it is the first element
+in the list. If the master is not in the list (ie the length < 11),
+then we skip the 3rd colour all together
+"""
 def get_colour(index, key, length):
-    print "key: {} index: {} length: {}".format(key,index, length)
+    #master is included in the list
     if length == len(colours):
         if index == 0:
+            #give the master the 3rd colour
             return colours[2]
         elif index <= 2:
+            #give slave1 and slave2 the 1st and 2nd colour
             return colours[(index-1)]
         else: 
+            #otherwise just give the slave the nth colour
             return colours[index]
     
+    #master is not in the list
     if index > 1:
-            return colours[index + 1]
+        #skip the third colour
+        return colours[index + 1]
     return colours[index]
 
 """
@@ -160,6 +174,9 @@ def plot_all(data, graph_title, y_axis_label, graph_filename, is_port_data):
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     fig.savefig(graph_filename, dpi=300, bbox_extra_artists=(title,legend,), bbox_inches='tight')
 
+"""
+Get subdirectories when given a path
+"""
 def get_subdirectories(path):
     subdirectories = []
     for filename in os.listdir(path):
@@ -173,10 +190,12 @@ Generate graphs using the data from the subdirectories of the given one
 def generate_graph(directory, graph_title):
     directories = sorted(get_subdirectories(directory))
     network_data_to_process = [
+                    #port stats
                     ("bytes_in", "Mbps transmitted by nodes", True, True),
                     ("bytes_out", "Mbps received by nodes", True, True),
                     ("packets_in", "pps transmitted by nodes", True, False),
                     ("packets_out", "pps received by nodes", True, False),
+                    #non-port stats
                     ("cpu_percent","CPU utilisation (%)", False, False),
                     ("disk_usage","Percentage of disk space used", False, False),
                     ("virtual_memory","Percentage of memory used", False, False)
@@ -192,6 +211,7 @@ def generate_graph(directory, graph_title):
 
         plot_all(data, graph_title, y_axis_label, os.path.join(directory, measurement + ".png"), is_port_data)
 
+        #re-graph without the master if it is non-port stats
         if not is_port_data:
             for d in data:
                 del d["elf-cluster"]
