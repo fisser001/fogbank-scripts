@@ -4,6 +4,7 @@ from collections import OrderedDict
 import os
 from textwrap import wrap
 import sys
+import csv
 
 #colours to use for the graphs
 colours = ["#e6194b","#3cb44b","#ffe119", "#f58231", "#911eb4", "#46f0f0", "#000080", "#aa6e28", "#800000", "#808080", "#fabebe"]
@@ -119,7 +120,7 @@ a subplot in the graph. The graph will be titled with the param: graph_title
 and label the y axis with the param: y axis label. Finally, it will be saved
 as a png file named with the param: graph_filename.
 """
-def plot_all(data, graph_title, y_axis_label, graph_filename, is_port_data):
+def plot_all(data, graph_title, y_axis_label, graph_filename, is_port_data, max_y):
 
     #how many rows and columns to use for the subplots
     dimension = generate_subplot_dimension(len(data))
@@ -154,7 +155,8 @@ def plot_all(data, graph_title, y_axis_label, graph_filename, is_port_data):
         #Get the length of a random list in the data (they should all be
         #the same length) and create the x axis tick labels based on this
         x_axis = create_x_axis_tick_labels(len(d.itervalues().next()))
-        # x_axis = create_x_axis_tick_labels(len(d.itervalues().next()))
+        #set y axis bounds and pad the top 
+        ax.set_ylim([0,max_y+(max_y*0.01)])
         #Finally, draw the plot
         if is_port_data:
             ax.stackplot(x_axis,d.values(),labels=d.keys(),colors=colours)
@@ -184,6 +186,32 @@ def get_subdirectories(path):
             subdirectories.append(filename)
     return subdirectories
 
+def get_max_yaxis_port(filename, convert_to_bits):
+    max_y = -1
+    with open(filename) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            value = float(row["derivative"])
+            if convert_to_bits:
+                value= (value*8)/1000000
+            if max_y < value:
+                max_y = value
+    return max_y
+
+def get_max_yaxis(filename):
+    max_master = -1
+    max_no_master = -1
+    with open(filename) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            value = float(row["value"])
+            node = row["tags"]
+            if max_master < value:
+                max_master = value
+            if node != "elf-cluster" and max_no_master < value:
+                max_no_master = value
+    return (max_master, max_no_master)
+
 """
 Generate graphs using the data from the subdirectories of the given one
 """
@@ -203,19 +231,36 @@ def generate_graph(directory, graph_title):
     
     for measurement, y_axis_label, is_port_data, convert_to_bits in network_data_to_process:
         data = []
+        #find the maximum y-value so that the y-axis scale is the same for all graphs
+        max_num = - 1
+        #for non-port stats, it also draws a graph without the master node, so need the max y value without the master
+        max_num_no_master = -1
+
         for dir_path in directories:
             #read in the csv file into a list
             csv_rows = read_csv(os.path.join(directory,dir_path, "indv_ports_"+ measurement + ".csv"),is_port_data)
             info = split_ports(csv_rows, convert_to_bits)
             data.append(info)
 
-        plot_all(data, graph_title, y_axis_label, os.path.join(directory, measurement + ".png"), is_port_data)
+            #get the max y-value for this directory
+            if is_port_data: 
+                dir_max = get_max_yaxis_port(os.path.join(directory,dir_path,"all_ports_"+ measurement + ".csv"), convert_to_bits)
+            else:
+                max = get_max_yaxis(os.path.join(directory,dir_path,"indv_ports_"+ measurement + ".csv"))
+                dir_max = max[0]
+                if max[1] > max_num_no_master:
+                    max_num_no_master = max[1]
+            
+            if dir_max > max_num:
+                max_num = dir_max
+
+        plot_all(data, graph_title, y_axis_label, os.path.join(directory, measurement + ".png"), is_port_data, max_num)
 
         #re-graph without the master if it is non-port stats
         if not is_port_data:
             for d in data:
                 del d["elf-cluster"]
-            plot_all(data, graph_title + " without master", y_axis_label, os.path.join(directory, measurement + "_no_master.png"), is_port_data)
+            plot_all(data, graph_title + " without master", y_axis_label, os.path.join(directory, measurement + "_no_master.png"), is_port_data, max_num_no_master)
 
 if __name__ == "__main__":
     generate_graph(sys.argv[1], sys.argv[2])
