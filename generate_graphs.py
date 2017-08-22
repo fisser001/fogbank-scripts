@@ -186,6 +186,10 @@ def get_subdirectories(path):
             subdirectories.append(filename)
     return subdirectories
 
+"""
+Gets the max y value for port data. 
+Converts the value to megabits if specified.
+"""
 def get_max_yaxis_port(filename, convert_to_bits):
     max_y = -1
     with open(filename) as csvfile:
@@ -198,6 +202,13 @@ def get_max_yaxis_port(filename, convert_to_bits):
                 max_y = value
     return max_y
 
+"""
+Get the max y value for non port data.
+Returns the max y when the master node data 
+is included and also when it is not included.
+This is because the graphs get drawn twice:
+once with the master node and once without it.
+"""
 def get_max_yaxis(filename):
     max_master = -1
     max_no_master = -1
