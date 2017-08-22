@@ -10,57 +10,38 @@ import csv
 colours = ["#e6194b","#3cb44b","#ffe119", "#f58231", "#911eb4", "#46f0f0", "#000080", "#aa6e28", "#800000", "#808080", "#fabebe"]
 
 """
-Read in the csv. Each row is appended to a list.
-Measurements for ports 12-26 are discarded since these
-ports are not used. 
+Read in the csv. This returns an ordered dict 
+with an entry for each port/node. Each value contains a list 
+of measurements associated with that port/node. 
+The convert_to_bits param is an option on whether the 
+measurement should be converted to megabits per second. 
 """
-def read_csv(filename, is_port_data):
-    csv_rows = []
-    with open(filename) as f:
-        next(f) #skip the header line
-        for line in f:
-            row = line.split(',')
-            #if this is port data, filter some ports
+def read_csv(filename, is_port_data, convert_to_bits=False):
+    data = OrderedDict()
+    with open(filename) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
             if is_port_data:
-                port_name = row[1]
+                port_name = row["tags"]
                 #get the port number from the port name
                 port_num = int(port_name[4:]) 
                 #only deal with ports 1-11 since the other ports are unused
                 if port_num > 11:
                     continue
 
-            #delete first element since it just states the type of 
-            #measurement (i.e bytes_in)
-            del row[0]
-            csv_rows.append(row)
-    return csv_rows
+                value = float(row["derivative"])
+                if convert_to_bits: 
+                    value = (value*8)/1000000 #byte/sec to megabit/sec
+            else:
+                value = float(row["value"])
 
-"""
-Create an ordered dict with an entry for each port.
-Each value contains a list of measurements associated 
-with that port. The convert_to_bits param is an option
-on whether the measurement should be converted to 
-megabits per second. 
-"""
-def split_ports(csv_rows,convert_to_bits=False):
-    port_info = OrderedDict()
-    current_port = None
+            value_list = data.get(row["tags"])
+            if value_list is None:
+                value_list = []
+                data[row["tags"]] = value_list
+            value_list.append(value)
 
-    for i in range(0,len(csv_rows)):
-        row = csv_rows[i]
-        value = float(row[2])
-        if convert_to_bits:
-            value = (value*8)/1000000 #byte/sec to megabit/sec
-        
-        if current_port != row[0]:
-            #new port, so create an empty list to store measurements on
-            current_port = row[0]
-            value_list =[]
-            port_info[current_port] = value_list
-
-        port_info.get(current_port).append(value)
-
-    return port_info
+    return data
 
 """
 Creates tick labels from the range 0 - max * 10.
@@ -248,13 +229,13 @@ def generate_graph(directory, graph_title):
         max_num_no_master = -1
 
         for dir_path in directories:
-            #read in the csv file into a list
-            csv_rows = read_csv(os.path.join(directory,dir_path, "indv_ports_"+ measurement + ".csv"),is_port_data)
-            info = split_ports(csv_rows, convert_to_bits)
+            #read in the csv file into an ordered dict
+            info = read_csv(os.path.join(directory,dir_path, "indv_ports_"+ measurement + ".csv"),is_port_data, convert_to_bits)
             data.append(info)
 
             #get the max y-value for this directory
             if is_port_data: 
+                #need to pass in the all_ports data because the indv_port data is stacked on top of each other, so the max indv_port data is too low 
                 dir_max = get_max_yaxis_port(os.path.join(directory,dir_path,"all_ports_"+ measurement + ".csv"), convert_to_bits)
             else:
                 max = get_max_yaxis(os.path.join(directory,dir_path,"indv_ports_"+ measurement + ".csv"))
