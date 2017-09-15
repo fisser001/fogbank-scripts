@@ -111,9 +111,11 @@ class HTTPHandler(BaseHTTPRequestHandler):
         requests.post(url)
     
     """
-    Monitor own stats every 10 seconds.
+    Monitor own stats every 1 second.
     """
     def monitor(self):
+        start_time = time.time()
+        i = 1
         while(monitoring_active):
             #get CPU, RAM, and harddisk stats
             stats = {}
@@ -121,7 +123,13 @@ class HTTPHandler(BaseHTTPRequestHandler):
             stats["virtual_memory"] = psutil.virtual_memory().percent
             stats["disk_usage"] = psutil.disk_usage("/").percent
             self.write_stats(os.uname()[1],stats)
-            time.sleep(10)
+
+            time_to_sleep = start_time + i - time.time()
+
+            if time_to_sleep > 0:
+                time.sleep(time_to_sleep)
+
+            i += 1
 
 #use a threaded server so that it can handle multiple requests at once
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):

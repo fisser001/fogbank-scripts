@@ -51,11 +51,14 @@ class HTTPHandler(BaseHTTPRequestHandler):
         self.wfile.write('Success')
 
     """
-    Monitor own stats every 10 seconds.
+    Monitor own stats every 1 second.
     """
     def monitor(self, main_server):
+        start_time = time.time()
+        i = 1
         while(monitoring_active):
             #get CPU, RAM, and harddisk stats
+
             stats = {}
             stats["cpu_percent"] = psutil.cpu_percent()
             stats["virtual_memory"] = psutil.virtual_memory().percent
@@ -65,7 +68,11 @@ class HTTPHandler(BaseHTTPRequestHandler):
             url = "http://{}:{}/push-stats".format(main_server,PORT)
             headers = {'content-type': 'application/json'}
             requests.post(url,data=json.dumps(stats), headers=headers)
-            time.sleep(10)
+            
+            time_to_sleep = start_time + i - time.time()
+            if time_to_sleep > 0:
+                time.sleep(time_to_sleep)
+            i += 1
 
 #start up the server
 if __name__ == "__main__":
