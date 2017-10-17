@@ -53,6 +53,9 @@ class HTTPHandler(BaseHTTPRequestHandler):
         self._set_headers(200,'text/html')
         self.wfile.write('Success')
 
+    def log_message(self, format, *args):
+        return
+
     """
     Monitor own stats every 1 second.
     """

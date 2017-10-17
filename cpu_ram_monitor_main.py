@@ -2,7 +2,7 @@ import psutil
 import os
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
-from threading import Thread
+from threading import Thread, Timer
 import requests
 import json
 import time
@@ -125,7 +125,9 @@ class HTTPHandler(BaseHTTPRequestHandler):
         for slave in slaves:
             t = Thread(target=self.send_request, args=(slave,path,))
             t.start()
-
+    
+    def log_message(self, format, *args):
+        return
     """
     Send a HTTP POST request to a slave 
     """
