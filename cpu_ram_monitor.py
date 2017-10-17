@@ -1,7 +1,7 @@
 import psutil
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
-from threading import Thread
+from threading import Thread, Timer
 import requests
 import json
 import time
@@ -38,10 +38,9 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 self._set_headers(405, 'text/html')
                 self.wfile.write('Monitoring is already active\n')
                 return     
-            #otherwise create a new thread to monitor stats
+        
             monitoring_active = True
-            t = Thread(target=self.monitor, args=(self.client_address[0],))
-            t.start()
+            self.monitor(self.client_address[0])
 
         else:
             #stop monitoring
@@ -54,25 +53,22 @@ class HTTPHandler(BaseHTTPRequestHandler):
     Monitor own stats every 1 second.
     """
     def monitor(self, main_server):
-        start_time = time.time()
-        i = 1
-        while(monitoring_active):
-            #get CPU, RAM, and harddisk stats
+        if not monitoring_active:
+            return
 
-            stats = {}
-            stats["cpu_percent"] = psutil.cpu_percent()
-            stats["virtual_memory"] = psutil.virtual_memory().percent
-            stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
+        #create a thread to start after 1 second
+        Timer(1.0, self.monitor,args=(main_server,)).start()
 
-            #send to main server
-            url = "http://{}:{}/push-stats".format(main_server,PORT)
-            headers = {'content-type': 'application/json'}
-            requests.post(url,data=json.dumps(stats), headers=headers)
-            
-            time_to_sleep = start_time + i - time.time()
-            if time_to_sleep > 0:
-                time.sleep(time_to_sleep)
-            i += 1
+        #get CPU, RAM, and harddisk stats
+        stats = {}
+        stats["cpu_percent"] = psutil.cpu_percent()
+        stats["virtual_memory"] = psutil.virtual_memory().percent
+        stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
+        #send to main server
+        url = "http://{}:{}/push-stats".format(main_server,PORT)
+        headers = {'content-type': 'application/json'}
+        requests.post(url,data=json.dumps(stats), headers=headers)
+
 
 #start up the server
 if __name__ == "__main__":
