@@ -5,10 +5,13 @@ from threading import Thread, Timer
 import requests
 import json
 import time
+import decimal
+import os
 
 PORT = 12345
 paths = ["/start-monitoring", "/end-monitoring"]
 monitoring_active = False
+multiple_harddrives = False
 
 class HTTPHandler(BaseHTTPRequestHandler):
     
@@ -24,7 +27,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
     Handle a HTTP POST message
     """
     def do_POST(self):
-        global monitoring_active
+        global monitoring_active, multiple_harddrives
         
         #check path
         if not self.path in paths:
@@ -38,7 +41,8 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 self._set_headers(405, 'text/html')
                 self.wfile.write('Monitoring is already active\n')
                 return     
-        
+            
+            multiple_harddrives = os.path.exists("/home/hduser/harddrive2")
             monitoring_active = True
             self.monitor(self.client_address[0])
 
@@ -63,7 +67,13 @@ class HTTPHandler(BaseHTTPRequestHandler):
         stats = {}
         stats["cpu_percent"] = psutil.cpu_percent()
         stats["virtual_memory"] = psutil.virtual_memory().percent
-        stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
+        if multiple_harddrives:
+            hd1 = psutil.disk_usage("/home/hduser/harddrive1")
+            hd2 = psutil.disk_usage("/home/hduser/harddrive2")
+            usage = ((hd1.used + hd2.used)/decimal.Decimal(hd1.total + hd2.total))*100
+            stats["disk_usage"] = round(usage,1)
+        else:
+            stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
         #send to main server
         url = "http://{}:{}/push-stats".format(main_server,PORT)
         headers = {'content-type': 'application/json'}
