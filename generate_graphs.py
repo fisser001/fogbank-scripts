@@ -5,6 +5,8 @@ import os
 from textwrap import wrap
 import sys
 import csv
+MASTER_PORT = "port11"
+MASTER_HOSTNAME = "elf-cluster"
 
 #colours to use for the graphs
 colours = ["#e6194b","#3cb44b","#ffe119", "#f58231", "#911eb4", "#46f0f0", "#000080", "#aa6e28", "#800000", "#808080", "#fabebe"]
@@ -17,17 +19,11 @@ The convert_to_bits param is an option on whether the
 measurement should be converted to megabits per second. 
 """
 def read_csv(filename, is_port_data, convert_to_bits=False):
-    data = OrderedDict()
+    data = dict()
     with open(filename) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if is_port_data:
-                port_name = row["tags"]
-                #get the port number from the port name
-                port_num = int(port_name[4:]) 
-                #only deal with ports 1-11 since the other ports are unused
-                if port_num > 11:
-                    continue
 
                 value = float(row["derivative"])
                 if convert_to_bits: 
@@ -41,7 +37,15 @@ def read_csv(filename, is_port_data, convert_to_bits=False):
                 data[row["tags"]] = value_list
             value_list.append(value)
 
-    return data
+    alphabetical_data = OrderedDict()
+    if is_port_data:
+        alphabetical_data[MASTER_PORT] = data.pop(MASTER_PORT)
+    else:
+        alphabetical_data[MASTER_HOSTNAME] = data.pop(MASTER_HOSTNAME)
+
+    for key, value in sorted(data.items()):
+        alphabetical_data[key] = value
+    return alphabetical_data
 
 """
 Creates tick labels from the range 0 - max * 10.
@@ -67,33 +71,6 @@ def generate_subplot_dimension(total_size):
 
     #not divisible
     return ((total_size/2)+1, 2)
-
-"""
-Gets the colour for the node for non-port stats. This gets confusing
-because in the port stats, the master (elf-cluster or port11)
-is the third element in the list, and so gets the 3rd colour. 
-However in the non-port stats list, it is the first element
-in the list. If the master is not in the list (ie the length < 11),
-then we skip the 3rd colour all together
-"""
-def get_colour(index, key, length):
-    #master is included in the list
-    if length == len(colours):
-        if index == 0:
-            #give the master the 3rd colour
-            return colours[2]
-        elif index <= 2:
-            #give slave1 and slave2 the 1st and 2nd colour
-            return colours[(index-1)]
-        else: 
-            #otherwise just give the slave the nth colour
-            return colours[index]
-    
-    #master is not in the list
-    if index > 1:
-        #skip the third colour
-        return colours[index + 1]
-    return colours[index]
 
 """
 Create a graph from the data given. Each element in the data represents 
@@ -136,17 +113,19 @@ def plot_all(data, graph_title, y_axis_label, graph_filename, is_port_data, max_
         #Get the length of a random list in the data (they should all be
         #the same length) and create the x axis tick labels based on this
         x_axis = create_x_axis_tick_labels(len(d.itervalues().next()))
-        #set y axis bounds and pad the top 
-        ax.set_ylim([0,max_y+(max_y*0.01)])
         #Finally, draw the plot
         if is_port_data:
-            ax.stackplot(x_axis,d.values(),labels=d.keys(),colors=colours)
+            #set y axis bounds and pad the top
+            ax.set_ylim([0, max_y+(max_y*0.01)])
+            ax.stackplot(x_axis, d.values(), labels=d.keys(), colors=COLOURS)
         else:
             j = 0 
             for key in d.iterkeys():
                 x_axis = create_x_axis_tick_labels(len(d.get(key)))
-                colour = get_colour(j,key, len(d))
-                ax.plot(x_axis,d.get(key),label=key, color= colour)
+                colour = COLOURS[j]
+                if MASTER_HOSTNAME not in d:
+                    colour = COLOURS[j+1]
+                ax.plot(x_axis, d.get(key), label=key, color=colour)
                 j += 1
         i += 1
 
@@ -204,6 +183,20 @@ def get_max_yaxis(filename):
                 max_no_master = value
     return (max_master, max_no_master)
 
+def remove_inactive(stats):
+    """
+    Remove entries where the node/port is inactive.
+    Being inactive means the values of the stats collected is 0.
+    """
+    for stat_name, stat_vals in stats.items():
+        inactive = True
+        for val in stat_vals:
+            if val > 0:
+                inactive = False
+                break
+        if inactive:
+            del stats[stat_name]
+
 """
 Generate graphs using the data from the subdirectories of the given one
 """
@@ -231,6 +224,7 @@ def generate_graph(directory, graph_title):
         for dir_path in directories:
             #read in the csv file into an ordered dict
             info = read_csv(os.path.join(directory,dir_path, "indv_ports_"+ measurement + ".csv"),is_port_data, convert_to_bits)
+            remove_inactive(info)
             data.append(info)
 
             #get the max y-value for this directory
