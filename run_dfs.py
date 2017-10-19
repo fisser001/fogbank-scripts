@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import subprocess
 
 programs = ["faucet.py", "gauge.py", "prometheus", "grafana-server"]

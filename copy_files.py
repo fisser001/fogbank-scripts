@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 file_list =["core-site.xml","mapred-site.xml","hdfs-site.xml","yarn-site.xml"] 
 PATH_TO_FILE = "/usr/local/hadoop/etc/hadoop/"

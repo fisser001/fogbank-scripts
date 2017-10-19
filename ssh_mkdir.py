@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import paramiko
 
 for i in range(1,11):

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import paramiko
 
 def run_sudo_command(client, cmd):
