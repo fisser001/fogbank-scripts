@@ -16,3 +16,77 @@ The switch pipeline is the flow tables a packet can traverse through. The pipeli
 
 Further reading: `OpenFlow 1.3 specification <https://www.opennetworking.org/images/stories/downloads/sdn-resources/onf-specifications/openflow/openflow-spec-v1.3.0.pdf>`_
 
+======
+FAUCET 
+======
+Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown here.
+
+To always get the most recent code, clone the github repository instead of using the pip package installation.
+
+.. code:: bash
+
+  git clone https://github.com/faucetsdn/faucet.git
+Run the faucet controller using:
+
+.. code:: bash
+
+  ryu-manager faucet.faucet --verbose
+It may be necessary to run the command above using sudo, since the default FAUCET log files are in /var/log which needs root access to modify.
+
+Gauge
+************
+Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given here.
+
+Gauge acts as a separate controller to Faucet, and only collects statistics.                        
+To run the gauge controller:
+
+.. code:: bash
+
+  ryu-manager --ofp-tcp-listen-port 6654 faucet.gauge  
+The --ofp-tcp-listen-port is to run gauge on a different TCP port than the faucet controller. Like with running faucet.py, this command may also need root access.
+
+Gauge can collect three types of statistics: port_status, port_stats, and flow_stats. Port status indicates a change of a switch port. The new status of a port can either be added, deleted, or modified. 
+Another statistic that can be collected is the port stat. This contains information about port counters: the rx_bytes, tx_bytes, dropped rx_packets, dropped tx_packets, errors, rx_packets, and tx_packets. 
+
+========
+InfluxDB
+========
+InfluxDB is a time series database which can be used to store statistics collected from the switch by Gauge. Installation instructions can be found `here <https://docs.influxdata.com/influxdb/v1.3/introduction/installation/>`_. InfluxDB can be used through the `HTTP API <https://docs.influxdata.com/influxdb/v1.3/guides/writing_data/>`_ or the `CLI <https://docs.influxdata.com/influxdb/v1.2/tools/shell/>`_. 
+
+Create a database using the CLI using:
+
+.. code:: bash
+
+  influx
+  CREATE DATABASE faucet
+View information about a particular measurement:
+
+.. code:: bash
+
+  precision rfc3339       #Displays date in readable format (UTC timezone)
+  SELECT * FROM bytes_in  #Show all the details from the bytes_in measurement
+  
+==========
+Prometheus
+==========
+Prometheus is a monitoring and alerting tool to obtain real time data about the system. It is used by Faucet to display data collected from the controller and the switch. Installation notes can be found `here <https://prometheus.io/docs/introduction/install/>`_. Prometheus also uses yaml files for configuration. To get Prometheus scraping information off Faucet, add the following lines to the prometheus.yml under scrape_configs:
+
+.. code:: yaml
+
+  scrape_configs:
+    - job_name: 'faucet'
+    target_groups:
+      - targets: ['127.0.0.1::9244']
+Change the IP address in targets to 172.17.0.1 if Faucet is running within Docker.
+To start up Prometheus, go to the directory containing the prometheus script:
+ 
+.. code:: bash
+
+  cd prometheus
+  ./prometheus
+The command above assumes that the yaml file is in the prometheus directory. To change this, indicate the location of the yaml file using the -config.file option:
+ 
+.. code:: bash
+
+  ./prometheus -config.file=/home/user/new_prom_config.yml
+View the data being scraped by going to http://localhost:9090/ in a browser.
