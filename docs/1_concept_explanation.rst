@@ -31,7 +31,7 @@ Run the faucet controller using:
 .. code:: bash
 
   ryu-manager faucet.faucet --verbose
-It may be necessary to run the command above using sudo, since the default FAUCET log files are in /var/log which needs root access to modify.
+It may be necessary to run the command above using ``sudo``, since the default FAUCET log files are in /var/log which needs root access to modify.
 
 Gauge
 ************
@@ -43,7 +43,7 @@ To run the gauge controller:
 .. code:: bash
 
   ryu-manager --ofp-tcp-listen-port 6654 faucet.gauge  
-The --ofp-tcp-listen-port is to run gauge on a different TCP port than the faucet controller. Like with running faucet.py, this command may also need root access.
+The ``--ofp-tcp-listen-port`` is to run gauge on a different TCP port than the faucet controller. Like with running faucet.py, this command may also need root access.
 
 Gauge can collect three types of statistics: port_status, port_stats, and flow_stats. Port status indicates a change of a switch port. The new status of a port can either be added, deleted, or modified. 
 Another statistic that can be collected is the port stat. This contains information about port counters: the rx_bytes, tx_bytes, dropped rx_packets, dropped tx_packets, errors, rx_packets, and tx_packets. 
@@ -90,3 +90,50 @@ The command above assumes that the yaml file is in the prometheus directory. To 
 
   ./prometheus -config.file=/home/user/new_prom_config.yml
 View the data being scraped by going to http://localhost:9090/ in a browser.
+
+=======
+Grafana
+=======
+Grafana displays time series data in graphs which can be compiled into dashboards. The data sources in this case are Prometheus and InfluxDB. Installation notes can be found `here <http://docs.grafana.org/installation/>`_. Once the grafana-server is running, go to http://localhost:3000/ in a browser.
+
+Add a data source by clicking the Grafana logo on the top left corner. Click on Data Source > Add data source and fill in the appropriate details. 
+
+Add a Dashboard by clicking on the logo again, choosing Dashboards > New. Select graph, and click on the panel title to edit. 
+
+This is the end of this document. If you wish to read an example of how all these components were used together, proceed to the next document.
+
+faucet.yaml example
+************
+ 
+.. code:: yaml
+
+  version: 2
+  vlans:
+    100:
+      name: "default-vlan"
+  
+  acls:
+    101:
+      - rule:
+        dl_type: 0x0800
+        actions:
+          allow: 1
+      - rule
+        dl_type: 0x0806
+        actions:
+          allow: 1
+  dps:
+    windscale-faucet-1:
+      dp_id: 0x0000e01aeb24e893
+      description: "SDN Switch"
+      hardware: "Allied-Telesis"
+      interfaces:
+        1:
+          native_vlan: 100
+          name: "port1"
+          acl_in: 101
+        2:
+          native_vlan: 100
+          name: "port2"
+          acl_in: 101
+
