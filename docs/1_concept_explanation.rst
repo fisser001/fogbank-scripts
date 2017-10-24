@@ -19,7 +19,7 @@ Further reading: `OpenFlow 1.3 specification <https://www.opennetworking.org/ima
 ======
 FAUCET 
 ======
-Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown here.
+Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here <faucet.yaml example>`_.
 
 To always get the most recent code, clone the github repository instead of using the pip package installation.
 
@@ -35,7 +35,7 @@ It may be necessary to run the command above using ``sudo``, since the default F
 
 Gauge
 ************
-Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given here.
+Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given `here <gauge.yaml example>`_.
 
 Gauge acts as a separate controller to Faucet, and only collects statistics.                        
 To run the gauge controller:
@@ -102,38 +102,83 @@ Add a Dashboard by clicking on the logo again, choosing Dashboards > New. Select
 
 This is the end of this document. If you wish to read an example of how all these components were used together, proceed to the next document.
 
+========
+Appendix
+========
 faucet.yaml example
 ************
  
 .. code:: yaml
 
-  version: 2
-  vlans:
+  version: 2                        # The current FAUCET config version
+  vlans:                            # VLANs that will be used. Each port must be in at least 1 VLAN.
     100:
       name: "default-vlan"
   
-  acls:
-    101:
-      - rule:
-        dl_type: 0x0800
-        actions:
-          allow: 1
-      - rule
-        dl_type: 0x0806
-        actions:
-          allow: 1
+  acls:                             # Access Control List:
+    101:                            # What rules will be applied to packets.  
+      - rule:                       # Each rule has matches and actions.
+        dl_type: 0x0800             # The action can either be: allow, mirror, or output.
+        actions:                    # Allow is either 0 or 1, and the other two actions 
+          allow: 1                  # are followed by a port number. 
+      - rule                        # In this yaml file, the two rules match on
+        dl_type: 0x0806             # the ethernet type of ARP and IPv4. 
+        actions:                    # Packets which match this are allowed.
+          allow: 1                  
   dps:
-    windscale-faucet-1:
-      dp_id: 0x0000e01aeb24e893
-      description: "SDN Switch"
-      hardware: "Allied-Telesis"
-      interfaces:
-        1:
-          native_vlan: 100
-          name: "port1"
-          acl_in: 101
-        2:
-          native_vlan: 100
-          name: "port2"
-          acl_in: 101
+    windscale-faucet-1:             # Datapaths:
+      dp_id: 0x0000e01aeb24e893     # The name of the datapath will be used 
+      description: "SDN Switch"     # by the data collected by Faucet and Gauge.
+      hardware: "Allied-Telesis"    # In this case, the dp name is windscale-faucet-1
+      interfaces:                   #
+        1:                          #
+          native_vlan: 100          # If a port does not tag traffic with VLAN tags,
+          name: "port1"             # then it must have a native_vlan field 
+          acl_in: 101               # corresponding to a VLAN in the vlans section.
+        2:                          # Each interface should also have a unique name
+          native_vlan: 100          # 
+          name: "port2"             # The acl_in section is what acls will be 
+          acl_in: 101               # applied to the interface.
 
+gauge.yaml example
+************
+ 
+.. code:: yaml
+
+  version: 2                            # Current FAUCET config version
+  faucet_configs:                       
+    - '/etc/ryu/faucet/faucet.yaml'     # Where the faucet config file is located
+
+  watchers:                             # This section configures the data collection.
+    port_stats:                         # The statistics that may be collected are 
+      dps: ['windscale-faucet-1']       # port stats, port state, and flow stats. 
+      type: 'port_stats'                # 
+      interval: 10                      # The interval field specifies how often
+      db: 'prometheus'                  # Gauge will poll the statistic. For example, 
+    port_state:                         # an interval of 10 will poll every 10 seconds
+      dps: ['windscale-faucet-1']       # 
+      type: 'port_state'                # The db field specifies which database from 
+      interval: 10                      # the dbs section will be used. 
+      db: 'influx'                      
+    flow_table_poller:                  
+      dps: ['windscale-faucet-1']       
+      type: 'flow_table'                
+      interval: 40                      
+      db: 'influx'                      
+  
+   dbs:                                 # This section configures the databases  
+    prometheus:                         # that the data will be stored in.
+        type: 'prometheus'              
+        prometheus_addr: 'localhost'    # Prometheus can only save port_stats.
+        prometheus_port: 9303
+    influx:
+        type: 'influx'                  # influx is saved to an InfluxDB database.
+        influx_db: 'faucet'             # The name of the database is configured 
+        influx_host: 'localhost'        # through the influx_db field.
+        influx_port: 8086               # You must create the database in Gauge first.
+        influx_user: 'faucet'
+        influx_pwd: 'faucet'
+        influx_timeout: 10
+    ft_file:                            # The stats is saved to a file.  
+        type: 'text'                    # The file name is specified in the file field.
+        file: 'gauge_stats'
