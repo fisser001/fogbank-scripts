@@ -119,12 +119,12 @@ Move the hadoop directory to ``/usr/local`` (change ``hadoop-2.8.0`` to the vers
 
 To configure Hadoop, the following files need to be modified:
 
-- `~/.bashrc <bashrc>`_
-- `/usr/local/hadoop/etc/hadoop/hadoop-env.sh <usrlocalhadoopetchadoophadoop-envsh>`_
-- `/usr/local/hadoop/etc/hadoop/core-site.xml <usrlocalhadoopetchadoopcore-sitexml>`_
-- `/usr/local/hadoop/etc/hadoop/mapred-site.xml <usrlocalhadoopetchadoopmapred-sitexml>`_
-- `/usr/local/hadoop/etc/hadoop/hdfs-site.xml <usrlocalhadoopetchadoophdfs-sitexml>`_
-- `/usr/local/hadoop/etc/hadoop/yarn-site.xml <usrlocalhadoopetchadoopyarn-sitexml>`_
+- `~/.bashrc </docs/4_1_single_node_hadoop.rst#bashrc>`_
+- `/usr/local/hadoop/etc/hadoop/hadoop-env.sh </docs/4_1_single_node_hadoop.rst#usrlocalhadoopetchadoophadoop-envsh>`_
+- `/usr/local/hadoop/etc/hadoop/core-site.xml </docs/4_1_single_node_hadoop.rst#usrlocalhadoopetchadoopcore-sitexml>`_
+- `/usr/local/hadoop/etc/hadoop/mapred-site.xml </docs/4_1_single_node_hadoop.rst#usrlocalhadoopetchadoopmapred-sitexml>`_
+- `/usr/local/hadoop/etc/hadoop/hdfs-site.xml </docs/4_1_single_node_hadoop.rst#usrlocalhadoopetchadoophdfs-sitexml>`_
+- `/usr/local/hadoop/etc/hadoop/yarn-site.xml </docs/4_1_single_node_hadoop.rst#usrlocalhadoopetchadoopyarn-sitexml>`_
 
 ~/.bashrc
 ^^^^^^^^^
