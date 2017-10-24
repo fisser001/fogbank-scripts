@@ -75,8 +75,11 @@ Prometheus is a monitoring and alerting tool to obtain real time data about the 
 
   scrape_configs:
     - job_name: 'faucet'
-    target_groups:
-      - targets: ['127.0.0.1::9244']
+    static_configs:
+      - targets: ['127.0.0.1:9302']
+    - job_name: 'gauge'
+    static_configs:
+      - targets: ['127.0.0.1:9303']
 Change the IP address in targets to 172.17.0.1 if Faucet is running within Docker.
 To start up Prometheus, go to the directory containing the prometheus script:
  
