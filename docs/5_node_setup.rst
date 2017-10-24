@@ -41,9 +41,11 @@ Format the drive
 
   sudo mkfs.ext4 -L Home /dev/sda1
 
-Install master’s ssh key on every node
---------------------------------------
-On the master node, run the command below to allow for password-less ssh:
+Install master’s ssh key on slave nodes
+---------------------------------------
+On the master node, run the ``ssh_key_copy.sh`` script to allow for password-less ssh. If the slave node's hostname does not start with ``slave``, you will have to modify the script.
+
+Run the command manually using: 
 
 .. code:: bash
 
@@ -53,6 +55,11 @@ e.g. ``ssh-copy-id hduser@slave1``
 
 Hostname changes
 ----------------
+Each node's hostname must be unique and the node must know about the other nodes in the cluster. 
+This can be done using the ``modify_etc_host.py`` script. The ``node_ip_hostname.txt`` file must be modified to match your setup, and the information in the txt file should also be appended to the master node's ``/etc/hosts``
+
+The script follows the steps below. You do not have to run these commands if the script has already been run.
+
 Change each node’s hostname to be unique (e.g. ``slave1``, ``slave2`` etc.)
 
 .. code:: bash
@@ -83,6 +90,9 @@ Modify ``/etc/hosts`` to have the hostnames and IP addresses of all the nodes. F
 
 You may also have to comment out the line containing ``127.0.1.1``.
 
+
+Mount harddrive
+----------------
 If the node's hard drive is not mounted, use the commands below. Change the folder name & location if desired.
 
 .. code:: bash
@@ -126,7 +136,7 @@ In our case, it should be ``cssh -l hduser hadoop-cluster``.
 
 An example of what you might see is shown below. Any commands typed in the little grey window will be executed on all the nodes. You can run a command on an individual node by clicking on the node’s terminal window. 
 
-Another way would be to write a script to run the commands for you. The paramiko library in python allows you to ssh into a node and perform the commands. 
+An alternative would be to use the scripts provided in this repository.
 
 Start up components on the master node
 --------------------------------------
@@ -162,4 +172,56 @@ Start up Hadoop:
   
   ./run_dfs.py
 
+Shutting down components
+-------------------------
+Stop Hadoop:
+
+.. code:: bash
   
+  ./kill_dfs.sh
+
+Stop Grafana and Influx:
+
+.. code:: bash
+
+  sudo service grafana-server stop
+  sudo service influxdb stop
+
+Stop Prometheus by searching for the Prometheus process:
+
+.. code:: bash
+
+  ps ax | grep prometheus
+
+This should produce output similar to:
+
+.. code:: bash
+
+   7955 ?        Sl   241:39 /home/hduser/prometheus/prometheus -config.file=/home/fogbank/prometheus/prometheus.yml
+  15727 pts/12   S+     0:00 grep --color=auto prometheus
+
+In this case, the process ID (PID) for Prometheus is 7955. 
+
+To stop Prometheus:
+
+.. code:: bash
+
+  kill <PID>
+
+Check that it has stopped by running this command again:
+
+.. code:: bash
+
+  ps ax | grep prometheus
+
+If it is still not stopped, run this command, which forces it to stop.
+
+.. code:: bash
+
+  kill -9 <PID>
+
+Faucet and Gauge can be stopped in the same way as Prometheus except to find the PID, use the command below instead:
+
+.. code:: bash
+
+  ps ax | grep ryu-manager
