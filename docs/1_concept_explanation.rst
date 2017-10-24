@@ -19,7 +19,7 @@ Further reading: `OpenFlow 1.3 specification <https://www.opennetworking.org/ima
 ======
 FAUCET 
 ======
-Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here <faucet.yaml example>`_.
+Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here <faucet.yaml-example>`_.
 
 To always get the most recent code, clone the github repository instead of using the pip package installation.
 
@@ -35,7 +35,7 @@ It may be necessary to run the command above using ``sudo``, since the default F
 
 Gauge
 ************
-Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given `here <gauge.yaml example>`_.
+Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given `here <gauge.yaml-example>`_.
 
 Gauge acts as a separate controller to Faucet, and only collects statistics.                        
 To run the gauge controller:
