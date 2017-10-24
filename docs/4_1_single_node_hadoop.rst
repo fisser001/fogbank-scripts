@@ -1,3 +1,6 @@
+.. contents:: Table of Contents
+  :depth: 2
+
 ==================
 Overview of Hadoop
 ==================
@@ -116,12 +119,12 @@ Move the hadoop directory to ``/usr/local`` (change ``hadoop-2.8.0`` to the vers
 
 To configure Hadoop, the following files need to be modified:
 
-- ~/.bashrc
-- /usr/local/hadoop/etc/hadoop/hadoop-env.sh
-- /usr/local/hadoop/etc/hadoop/core-site.xml
-- /usr/local/hadoop/etc/hadoop/mapred-site.xml
-- /usr/local/hadoop/etc/hadoop/hdfs-site.xml
-- /usr/local/hadoop/etc/hadoop/yarn-site.xml
+- `~/.bashrc <bashrc>`_
+- `/usr/local/hadoop/etc/hadoop/hadoop-env.sh <usrlocalhadoopetchadoophadoop-envsh>`_
+- `/usr/local/hadoop/etc/hadoop/core-site.xml <usrlocalhadoopetchadoopcore-sitexml>`_
+- `/usr/local/hadoop/etc/hadoop/mapred-site.xml <usrlocalhadoopetchadoopmapred-sitexml>`_
+- `/usr/local/hadoop/etc/hadoop/hdfs-site.xml <usrlocalhadoopetchadoophdfs-sitexml>`_
+- `/usr/local/hadoop/etc/hadoop/yarn-site.xml <usrlocalhadoopetchadoopyarn-sitexml>`_
 
 ~/.bashrc
 ^^^^^^^^^
@@ -141,7 +144,11 @@ Modify ~/.bashrc to include:
   export HADOOP_OPTS="-Djava.library.path=$HADOOP_INSTALL/lib/native"
   export CLASSPATH=$CLASSPATH:/usr/local/hadoop/lib/*:.
 
-Apply changes: source ~/.bashrc
+Apply changes: 
+
+.. code:: bash
+
+  source ~/.bashrc
 
 /usr/local/hadoop/etc/hadoop/hadoop-env.sh
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
