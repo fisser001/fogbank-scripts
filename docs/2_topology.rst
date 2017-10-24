@@ -21,3 +21,27 @@ To display the data, Grafana obtains it from both Prometheus and InfluxDB.
 
 .. image:: /docs/images/application_desc.png
 
+==================
+Table of TCP Ports
+==================
++----------------------------+----------+
+| Application                | TCP Port |
++============================+==========+
+| OpenFlow controller        | 6653     |
++----------------------------+----------+
+| Faucet                     | 6653     |
++----------------------------+----------+
+| Gauge                      | 6654     |
++----------------------------+----------+
+| InfluxDB (HTTP API)        | 8086     |
++----------------------------+----------+
+| InfluxDB (RPC service)     | 8088     |
++----------------------------+----------+
+| Prometheus client (Faucet) | 9302     |
++----------------------------+----------+
+| Prometheus client (Gauge)  | 9303     |
++----------------------------+----------+
+| Grafana                    | 3000     |
++----------------------------+----------+
+
+Note that the official IANA assigned port for OpenFlow is 6653 but 6633 was used before this was obtained.
