@@ -3,6 +3,8 @@ Topology
 ==========
 The current topology is illustrated in the diagram below. The switch is an OpenFlow enabled AT-x510 switch from Allied Telesis. 10 blade servers are connected to the switch and acts as the cluster. These servers boot from an image obtained through the PXE (Preboot eXecution Environment) server on the control PC. The control PC has two connections to the switch. One is to link the PXE server to the blade servers, and the other is to act as the controller. The control PC is also connected to the Internet through Wi-Fi.
 
+.. image:: /docs/images/topology.png
+
 =========================
 Application Architecture
 =========================
@@ -16,3 +18,6 @@ Gauge stores the statistics in InfluxDB, regular text files, or Prometheus. Both
 Both Gauge and Faucet can use Prometheus. Faucet has a HTTP server running on port 9302, and Gauge has one running on 9303. Prometheus pulls information off both servers to collect the statistics.
 
 To display the data, Grafana obtains it from both Prometheus and InfluxDB.
+
+.. image:: /docs/images/application_desc.png
+
