@@ -1,3 +1,5 @@
+.. contents:: Table of Contents
+  :depth: 2
 =======================
 Hadoop Multi-Node Setup
 =======================
@@ -92,3 +94,53 @@ The slaves should be running:
 - Node Manager
 
 If something is not running, check the logs located at ``/usr/local/hadoop/logs`` or through the web app by visiting http://node-hostname:50075/logs. Replace node-hostname with the actual node’s hostname. Each node should have their own logs. 
+
+You can also start each component individually using:
+
++--------------------+----------------------------------------------------------------------------------------+
+| Component          | Command to start up                                                                    |
++====================+========================================================================================+
+| Name Node          | ``hdfs namenode``                                                                      |
++--------------------+----------------------------------------------------------------------------------------+
+| Resource Manager   | ``yarn resourcemanager``                                                               |
++--------------------+----------------------------------------------------------------------------------------+
+| Job History Server | ``mr-jobhistory-daemon.sh --config /usr/local/hadoop/etc/hadoop/ start historyserver`` |
++--------------------+----------------------------------------------------------------------------------------+
+| Data Node          | ``hdfs datanode``                                                                      |
++--------------------+----------------------------------------------------------------------------------------+
+| Node Manager       | ``yarn nodemanager``                                                                   |
++--------------------+----------------------------------------------------------------------------------------+
+
+======================
+Hadoop Web interfaces 
+======================
+Hadoop provides Web interfaces for each component
+
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Component           | URL                                                                                                                                           |
++=====================+===============================================================================================================================================+
+| Name Node           | http://node-hostname:50070                                                                                                                    |
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Secondary Name Node | http://node-hostname:50090                                                                                                                    |
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Resource Manager    | http://node-hostname:8088 (default)                                                                                                           |
+|                     |                                                                                                                                               |
+|                     | http://node-hostname:8089 (if config has been changed as seen `here </docs/4_1_single_node_hadoop.rst#usrlocalhadoopetchadoopyarn-sitexml>`_) |
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Job History Server  | http://node-hostname:19888                                                                                                                    |
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Data Node           | http://node-hostname:50075                                                                                                                    |
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+| Node Manager        | http://node-hostname:8042                                                                                                                     |
++---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------+
+===============
+Troubleshooting
+===============
+
+- Time not synced between nodes
+  
+  Install NTP on the nodes so that the clocks are synced. http://knowm.org/how-to-synchronize-time-across-a-linux-cluster/ 
+
+- The logs say something about running out of Java heap space
+  
+  Increase the ``mapreduce.map.java.opts`` or ``mapreduce.reduce.java`` in the  ``mapred-site.xml`` config file.  
