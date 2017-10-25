@@ -28,7 +28,7 @@ Another statistic that can be collected is the port stat. This contains informat
 
 The statistics can be stored in three ways: using `InfluxDB <https://docs.influxdata.com/influxdb/>`_, `Prometheus <https://prometheus.io/docs/introduction/overview/>`_, or a regular text file. InfluxDB is a time series database which stores all three types of statistics. Prometheus is a monitoring and alerting tool to obtain real time data about the system. It is used by Faucet to display data collected from the controller and the switch. It can also be used to display port stats data from Gauge. 
 
-The statistics obtained from both Faucet and Gauge can be displayed in `Grafana <http://docs.grafana.org/>`. This displays time series data in graphs which can be compiled into dashboards. The data sources in this case are Prometheus and InfluxDB.
+The statistics obtained from both Faucet and Gauge can be displayed in `Grafana <http://docs.grafana.org/>`_. This displays time series data in graphs which can be compiled into dashboards. The data sources in this case are Prometheus and InfluxDB.
 
 How it all ties in
 -------------------
