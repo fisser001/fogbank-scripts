@@ -19,7 +19,7 @@ Further reading: `OpenFlow 1.3 specification <https://www.opennetworking.org/ima
 ======
 FAUCET 
 ======
-Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here <faucet.yaml-example>`_.
+Faucet is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here </docs/1_concept_explanation.rst#faucetyaml-example>`_.
 
 To always get the most recent code, clone the github repository instead of using the pip package installation.
 
@@ -35,7 +35,7 @@ It may be necessary to run the command above using ``sudo``, since the default F
 
 Gauge
 ************
-Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given `here <gauge.yaml-example>`_.
+Gauge can be used alongside Faucet to collect port and flow statistics from switches. The statistics are then inserted into InfluxDB or a JSON file, depending on the configuration on the gauge yaml file. A sample yaml file is given `here </docs/1_concept_explanation.rst#gaugeyaml-example>`_.
 
 Gauge acts as a separate controller to Faucet, and only collects statistics.                        
 To run the gauge controller:
@@ -47,6 +47,12 @@ The ``--ofp-tcp-listen-port`` is to run gauge on a different TCP port than the f
 
 Gauge can collect three types of statistics: port_status, port_stats, and flow_stats. Port status indicates a change of a switch port. The new status of a port can either be added, deleted, or modified. 
 Another statistic that can be collected is the port stat. This contains information about port counters: the rx_bytes, tx_bytes, dropped rx_packets, dropped tx_packets, errors, rx_packets, and tx_packets. 
+
+**NOTE**
+
+**If Gauge is being used with Faucet, you need to make sure that your switch is able to connect to two controllers.**
+
+For example, the `Zodiac <https://github.com/faucetsdn/faucet/blob/3f94cd8dc555687e0b0b4c10dbafccba7d1e5514/docs/vendors/northboundnetworks/README_ZodiacFX.rst>`_ switch only allows for one controller, so Gauge cannot be used. By default, an OpenFlow switch may only connect to one controller, so you may have to change the switch configuration. Instructions to configure an Allied-Telesis switch is detailed `here </docs/faucet_troubleshooting.rst#switch-configuration>`_.
 
 ========
 InfluxDB
