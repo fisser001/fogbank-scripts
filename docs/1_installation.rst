@@ -1,7 +1,7 @@
 ======
 FAUCET 
 ======
-Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here </docs/1_2_installation.rst#faucetyaml-example>`_.
+Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here </docs/1_installation.rst#faucetyaml-example>`_.
 
 To always get the most recent code, clone the github repository instead of using the pip package installation.
 
@@ -18,7 +18,7 @@ It may be necessary to run the command above using ``sudo``, since the default F
 ======
 Gauge
 ======
-A sample yaml file is given `here </docs/1_2_installation.rst#gaugeyaml-example>`_.
+A sample yaml file is given `here </docs/1_installation.rst#gaugeyaml-example>`_.
 
 Gauge acts as a separate controller to Faucet, and only collects statistics.                        
 To run the gauge controller:
