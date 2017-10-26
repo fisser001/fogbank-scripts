@@ -19,20 +19,18 @@ Further reading: `OpenFlow 1.3 specification <https://www.opennetworking.org/ima
 =================
 Faucet and Gauge 
 =================
-`Faucet <https://github.com/faucetsdn/faucet>`_ is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). 
+`Faucet <https://github.com/faucetsdn/faucet>`_ is a OpenFlow controller, which is based on `Ryu <http://osrg.github.io/ryu/>`_ and `Valve <https://github.com/wandsdn/valve>`_ (both are also OpenFlow controllers). It allows for easy configuration of the network using yaml files. Faucet provides the forwarding logic for the switches. To collect statistics about the network, Gauge is used alongside Faucet. Gauge is also an OpenFlow controller.
 
-Gauge is also an OpenFlow controller can be used alongside Faucet to collect statistics from switches. 
-
-There are three types of statistics: port_status, port_stats, and flow_stats. Port status indicates a change of a switch port. The new status of a port can either be added, deleted, or modified. 
+Gauge collects three types of statistics: port_status, port_stats, and flow_stats. Port status indicates a change of a switch port. The new status of a port can either be added, deleted, or modified. 
 Another statistic that can be collected is the port stat. This contains information about port counters: the rx_bytes, tx_bytes, dropped rx_packets, dropped tx_packets, errors, rx_packets, and tx_packets. 
 
-The statistics can be stored in three ways: using `InfluxDB <https://docs.influxdata.com/influxdb/>`_, `Prometheus <https://prometheus.io/docs/introduction/overview/>`_, or a regular text file. InfluxDB is a time series database which stores all three types of statistics. Prometheus is a monitoring and alerting tool to obtain real time data about the system. It is used by Faucet to display data collected from the controller and the switch. It can also be used to display port stats data from Gauge. 
+The statistics can be stored in three ways: using `InfluxDB <https://docs.influxdata.com/influxdb/>`_, `Prometheus <https://prometheus.io/docs/introduction/overview/>`_, or a regular text file. InfluxDB is a time series database which stores all three types of statistics. Prometheus is a monitoring and alerting tool to obtain real time data about the system. It can be used to display port stats data from Gauge. It is also used by Faucet to display data collected from the controller and the switch. 
 
 The statistics obtained from both Faucet and Gauge can be displayed in `Grafana <http://docs.grafana.org/>`_. This displays time series data in graphs which can be compiled into dashboards. The data sources in this case are Prometheus and InfluxDB.
 
-How it all ties in
--------------------
-Although both are OpenFlow controllers, there are differences between the two. Gauge must be operated with Faucet, since it monitors Faucet controlled switches. Gauge only collects statistics, whereas Faucet defines the switch behaviour through OpenFlow messages. 
+Application Architecture
+-------------------------
+An explanation on how all of these concepts come together is detailed in this section. Both Faucet and Gauge are both OpenFlow controllers. However Gauge must be operated with Faucet, since it can only monitor Faucet controlled switches. Gauge only collects statistics, whereas Faucet defines the switch behaviour through OpenFlow messages. 
 
 Because of this, Faucet and Gauge collects different information from the switch. Faucet processes asynchronous messages from the switch, which includes packet ins, flow removal, and error messages. The switch sends the controller these types of messages on its own, without a request from the controller. This information, as well as others (number of yaml reload requests, BGP neighbours etc) is monitored for Prometheus. On the other hand, Gauge has to continuously request for port and flow statistics.
 
@@ -41,6 +39,7 @@ Both Gauge and Faucet can use Prometheus. Faucet has a HTTP server running on po
 To display the data, Grafana obtains it from both Prometheus and InfluxDB.
 
 .. image:: /docs/images/application_desc.png
+  :align: center
 
 ==================
 Table of TCP Ports
