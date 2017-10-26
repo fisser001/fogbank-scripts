@@ -166,6 +166,12 @@ Start up Grafana and Influx
 
 Sometimes Grafana fails to start, but usually it starts up when the command is issued a second time.
 
+Start up the node utilisation monitor:
+
+.. code:: bash
+  
+  ./start_monitor.py
+
 Start up Hadoop:
 
 .. code:: bash
