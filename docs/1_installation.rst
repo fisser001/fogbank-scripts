@@ -1,18 +1,26 @@
 ======
 FAUCET 
 ======
-Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here </docs/1_installation.rst#faucetyaml-example>`_.
+Installation instructions can be found `here <https://github.com/faucetsdn/faucet/blob/master/docs/README_install.rst>`_. An example configuration file is shown `here </docs/1_installation.rst#faucetyaml-example>`_. 
 
-To always get the most recent code, clone the github repository instead of using the pip package installation.
+Check your yaml file using:
+
+.. code:: bash
+
+  check_faucet_config.py /etc/ryu/faucet.yaml
+  
+To always get the most recent code, clone the github repository.
 
 .. code:: bash
 
   git clone https://github.com/faucetsdn/faucet.git
+
 Run the faucet controller using:
 
 .. code:: bash
 
   ryu-manager faucet.faucet --verbose
+
 It may be necessary to run the command above using ``sudo``, since the default FAUCET log files are in /var/log which needs root access to modify.
 
 ======
@@ -26,6 +34,7 @@ To run the gauge controller:
 .. code:: bash
 
   ryu-manager --ofp-tcp-listen-port 6654 faucet.gauge  
+
 The ``--ofp-tcp-listen-port`` is to run gauge on a different TCP port than the faucet controller. Like with running faucet.py, this command may also need root access.
 
 **NOTE**
@@ -45,6 +54,7 @@ Create a database using the CLI using:
 
   influx
   CREATE DATABASE faucet
+
 View information about a particular measurement:
 
 .. code:: bash
@@ -66,6 +76,7 @@ Installation notes can be found `here <https://prometheus.io/docs/introduction/i
     - job_name: 'gauge'
     static_configs:
       - targets: ['127.0.0.1:9303']
+
 Change the IP address in targets to 172.17.0.1 if Faucet is running within Docker.
 To start up Prometheus, go to the directory containing the prometheus script:
  
@@ -73,11 +84,13 @@ To start up Prometheus, go to the directory containing the prometheus script:
 
   cd prometheus
   ./prometheus
+
 The command above assumes that the yaml file is in the prometheus directory. To change this, indicate the location of the yaml file using the -config.file option:
  
 .. code:: bash
 
   ./prometheus -config.file=/home/user/new_prom_config.yml
+
 View the data being scraped by going to http://localhost:9090/ in a browser.
 
 =======
@@ -88,8 +101,6 @@ Installation notes can be found `here <http://docs.grafana.org/installation/>`_.
 Add a data source by clicking the Grafana logo on the top left corner. Click on Data Source > Add data source and fill in the appropriate details. 
 
 Add a Dashboard by clicking on the logo again, choosing Dashboards > New. Select graph, and click on the panel title to edit. 
-
-This is the end of this document. If you wish to read an example of how all these components were used together, proceed to the next document.
 
 ========
 Appendix
