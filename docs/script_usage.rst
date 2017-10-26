@@ -1,3 +1,6 @@
+.. contents:: Table of Contents
+  :depth: 2
+
 Script Usage
 ============
 This document explains how each script is run and the appropriate uses for the script. 
