@@ -1,7 +1,7 @@
 ===============
 Fogbank Scripts
 ===============
-This repository contains scripts used for a computational cluster running `Hadoop <http://hadoop.apache.org/>`_.
+This repository contains scripts used for a computational cluster running `Hadoop <http://hadoop.apache.org/>`_. Learn how to use these scripts in `docs/script_usage.rst <docs/script_usage.rst>`_
 
 The overall goal is to collect statistics while the Hadoop cluster executes tasks. These statistics should be about the network and each node's utilisation. This will then be used to infer information about how the tasks affect the nodes. 
 
@@ -40,17 +40,5 @@ Hive provides a way to manage databases on Hadoop. Tez processes data for Hive. 
 3. Automated statistics collection
 -----------------------------------
 The automated collection of statistics during a task is done through the `run_multiple_queries.py <run_multiple_queries.py>`_ script. It runs a Hive query multiple times, and generates graphs from the statistics collected during the query. 
-This script is run using:
 
-.. code:: bash
-
-  ./run_multiple_queries.py <repetition> <hive query> <graph title>
-
-In the example below, the Hive query is to display all the unique names in the address_book table which is in the info database. The query will be repeated 10 times, and the graphs generated will be titled "Utilisation during a DISTINCT Hive query".
-
-.. code:: bash
-
-  ./run_multiple_queries.py 10 "use info; SELECT DISTINCT name FROM address_book" "Utilisation during a DISTINCT Hive query"
-
-The script obtains the statistics from the InfluxDB database written to by Gauge. It also obtains node utilisation statistics using `cpu_ram_monitor.py <cpu_ram_monitor.py> `_ and `cpu_ram_monitor_main.py <cpu_ram_monitor_main.py> `_
-
+More details can be found in `docs/6_automated_queries.rst <docs/6_automated_queries.rst>`_.
