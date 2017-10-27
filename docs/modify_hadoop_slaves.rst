@@ -30,7 +30,7 @@ This section provides details on how to safely remove a data node without losing
 
 **Note**: the number of live data nodes must not fall below the replication factor. Otherwise, the replication factor can no longer be met and the HDFS blocks would be under replicated.
 
-1. Check if you have an exclude file in the Hadoop config folder on the master. If yes, skip to step 5. Otherwise go to step 2.
+1. Check if you have an exclude file in the Hadoop config folder on the master. If yes, skip to step 6. Otherwise go to step 2.
 
 2. Stop the Hadoop cluster
 
@@ -44,18 +44,28 @@ This section provides details on how to safely remove a data node without losing
   
   touch /usr/local/hadoop/etc/hadoop/exclude
 
-4. Start the Hadoop cluster
+4. Add the following config to ``/usr/local/hadoop/etc/hadoop/hdfs-site.xml``
+
+.. code:: xml
+  
+    <property>
+      <name>dfs.hosts.exclude</name>
+      <value>/usr/local/hadoop/etc/hadoop/exclude</value>
+      <final>true</final>
+    </property>
+  
+5. Start the Hadoop cluster
 
 .. code:: bash
   
   ./run_dfs.py
 
-5. Add the data node host name in the exclude file, and execute the following command:
+6. Add the data node host name in the exclude file, and execute the following command:
 
 .. code:: bash
   
   hdfs dfsadmin -refreshNodes
 
-6. Check http://master_hostname:50070/dfshealth.html#tab-datanode to see when the data node has been decommissioned. This may take some time since the data contained within the node must be written somewhere else.  
+7. Check http://master_hostname:50070/dfshealth.html#tab-datanode to see when the data node has been decommissioned. This may take some time since the data contained within the node must be written somewhere else.  
 
-7. Remove the data node from the slaves config file (``/usr/local/hadoop/etc/hadoop/slaves``)
+8. Remove the data node from the slaves config file (``/usr/local/hadoop/etc/hadoop/slaves``)
