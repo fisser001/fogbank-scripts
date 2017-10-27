@@ -136,6 +136,8 @@ In our case, it should be ``cssh -l hduser hadoop-cluster``.
 
 An example of what you might see is shown below. Any commands typed in the little grey window will be executed on all the nodes. You can run a command on an individual node by clicking on the node’s terminal window. 
 
+.. image:: /docs/images/clusterssh.png
+
 An alternative would be to use the scripts provided in this repository.
 
 Start up components on the master node
@@ -171,6 +173,8 @@ Start up the node utilisation monitor:
 .. code:: bash
   
   ./start_monitor.py
+
+Modify the Hadoop slave file (``/usr/local/hadoop/etc/hadoop/slaves``) to include the hostnames of all the data nodes (all the slave nodes)
 
 Start up Hadoop:
 
