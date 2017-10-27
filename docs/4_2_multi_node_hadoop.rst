@@ -100,15 +100,15 @@ You can also start each component individually using:
 +--------------------+----------------------------------------------------------------------------------------+
 | Component          | Command to start up                                                                    |
 +====================+========================================================================================+
-| Name Node          | ``hdfs namenode``                                                                      |
+| Name Node          | ``hadoop-daemon.sh start namenode``                                                    |
 +--------------------+----------------------------------------------------------------------------------------+
-| Resource Manager   | ``yarn resourcemanager``                                                               |
+| Resource Manager   | ``yarn-daemon.sh start resourcemanager``                                               |
 +--------------------+----------------------------------------------------------------------------------------+
 | Job History Server | ``mr-jobhistory-daemon.sh --config /usr/local/hadoop/etc/hadoop/ start historyserver`` |
 +--------------------+----------------------------------------------------------------------------------------+
-| Data Node          | ``hdfs datanode``                                                                      |
+| Data Node          | ``hadoop-daemon.sh start datanode``                                                    |
 +--------------------+----------------------------------------------------------------------------------------+
-| Node Manager       | ``yarn nodemanager``                                                                   |
+| Node Manager       | ``yarn-daemon.sh start nodemanager``                                                   |
 +--------------------+----------------------------------------------------------------------------------------+
 
 ======================
