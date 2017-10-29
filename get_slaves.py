@@ -1,7 +1,8 @@
 import os
 
 def get_slaves(remove_host=False):
-    slaves_file = os.path.join(os.environ["HADOOP_HOME"], "etc", "hadoop", "slaves")
+    hadoop_path = os.getenv("HADOOP_HOME", "/usr/local/hadoop/")
+    slaves_file = os.path.join(hadoop_path, "etc", "hadoop", "slaves")
     slaves = []
     # get the slave hostnames
     with open(slaves_file) as f:
