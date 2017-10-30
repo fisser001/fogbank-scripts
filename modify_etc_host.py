@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import paramiko
 
+from get_hadoop_attributes import get_slaves
 def run_sudo_command(client, cmd):
     stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
     stdin.write('hduser\n')
@@ -16,20 +17,19 @@ new_contents = '127.0.0.1\tlocalhost\n#127.0.1.1\thduser\n\n'\
 with open('node_ip_hostname.txt', 'r') as f:
     new_contents += f.read()
 
-for i in range(11,20):
-    print('Modifying slave'+str(i))
+for slave in get_slaves():
+    print('Modifying ' + slave)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    hostname = 'slave' + str(i) 
-    ssh.connect(hostname = hostname, username = 'hduser', look_for_keys=True)
+    ssh.connect(hostname = slave, username = 'hduser', look_for_keys=True)
     
     cmd = 'echo "{}\n" | sudo tee /etc/hosts'.format(new_contents)
     run_sudo_command(ssh, cmd)
 
-    cmd = 'sudo hostname ' + hostname
+    cmd = 'sudo hostname ' + slave
     run_sudo_command(ssh, cmd)
 
-    cmd = 'echo "{}" | sudo tee /etc/hostname'.format(hostname)
+    cmd = 'echo "{}" | sudo tee /etc/hostname'.format(slave)
     run_sudo_command(ssh, cmd)
 
 
