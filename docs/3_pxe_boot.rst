@@ -100,11 +100,11 @@ Run using
 
   PinguyBuilder-gtk
 
-Go to the Settings tab and change the username to be your own. Also uncheck the “Show install icon on Backup mode desktop” option. 
+Go to the Settings tab and change the username to be your own. Also uncheck the "Show install icon on Backup mode desktop" option. 
 
 .. image:: /docs/images/vm_7.png
 
-Go to the Actions tab and click on “Select User, whose current settings will be used as default.” Then click on “Backup” to create the ISO image.                                                                                                       
+Go to the Actions tab and click on "Select User, whose current settings will be used as default." Then click on "Backup" to create the ISO image.                                                                                                       
 
 .. image:: /docs/images/vm_8.png
 
@@ -295,7 +295,7 @@ The blade servers that were used are Dell Poweredge 1955 blades. The instruction
 - Reboot the blade
 - Press F2 to go to the system setup menu
 - Select the Integrated Devices menu item and press Enter
-- Press the down arrow key to the Network Interface Controller menu items and press space until “Enabled with PXE” is selected. Only one interface enabled with PXE is needed.
+- Press the down arrow key to the Network Interface Controller menu items and press space until "Enabled with PXE" is selected. Only one interface enabled with PXE is needed.
 - Save changes and exit
 - Press F12 to PXE boot
 
@@ -303,11 +303,11 @@ The blade servers that were used are Dell Poweredge 1955 blades. The instruction
 Troubleshooting
 ===============
 
-Blade says “No PXE-capable device found”
+Blade says "No PXE-capable device found"
 ---------------------------------------
 
 You need to check three components: the blade interface, DHCP server, and switch controller. 
-Check that at least one interface is enabled with PXE, this can be done in the “Configuring network blades to PXE boot” section. 
+Check that at least one interface is enabled with PXE, this can be done in the "Configuring network blades to PXE boot" section. 
 
 If it is still not working, check the server. Run tcpdump or wireshark to check that you are getting DHCP requests from the blades and DHCP replies from the server. If there is no reply, start up the DHCP server with ``sudo /etc/init.d/isc-dhcp-server start``. 
 

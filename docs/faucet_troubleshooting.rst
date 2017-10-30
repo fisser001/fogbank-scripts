@@ -75,7 +75,7 @@ grep is used to display lines which match the given pattern. For example, when t
 
 .. code:: bash
 
-  grep -r “word” /home/user
+  grep -r "word" /home/user
 
 The -r is to search recursively and look through each directory under the given path. Another way to use it is to pipe the output from another command. 
 

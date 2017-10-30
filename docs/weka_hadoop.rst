@@ -20,7 +20,7 @@ Set ``$WEKA_HOME`` by modifying ``~/.bashrc`` (replace username with your userna
 
 .. code:: bash
 
-  export $WEKA_HOME=”/home/username/weka”
+  export $WEKA_HOME="/home/username/weka"
 
 Then set the new config using:
 

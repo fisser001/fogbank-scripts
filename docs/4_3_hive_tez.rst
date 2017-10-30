@@ -8,7 +8,7 @@ Hive allows for the storage of large datasets on Hadoop. These datasets can be q
 
 Follow the installation instructions from `here <http://www.bogotobogo.com/Hadoop/BigData_hadoop_Hive_Install_On_Ubuntu_16_04.php>`_. 
 
-For the “Configuring Hive Metastore” step, also modify the existing properties in ``hive-site.xml``:
+For the "Configuring Hive Metastore" step, also modify the existing properties in ``hive-site.xml``:
 
 .. code:: xml
   
