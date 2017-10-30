@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
-from get_slaves import get_slaves
+from get_hadoop_attributes import get_slaves
+
 file_list = ["core-site.xml","mapred-site.xml","hdfs-site.xml","yarn-site.xml"]
 hadoop_path = os.getenv("HADOOP_HOME", "/usr/local/hadoop/")
 path_to_file = os.path.join(hadoop_path, "etc", "hadoop")

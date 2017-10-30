@@ -8,10 +8,12 @@ import os
 import psutil
 import requests
 
+from get_hadoop_attributes import get_hadoop_dir
+
 PORT = 12345
 PATHS = ["/start-monitoring", "/end-monitoring"]
 monitoring_active = False
-multiple_harddrives = False
+disk_mounts = set()
 
 class HTTPHandler(BaseHTTPRequestHandler):
 
@@ -22,6 +24,20 @@ class HTTPHandler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header('Content-type', ctype)
         self.end_headers()
+
+    def _get_mount_points(self):
+        global disk_mounts
+        disk_mounts = set()
+        mount_points = [part.mountpoint for part in psutil.disk_partitions()]
+        mount_points = sorted(mount_points, key=len, reverse=True)
+
+        paths = get_hadoop_dir("dfs.datanode.data.dir")
+
+        for path in paths:
+            for mount in mount_points:
+                if path.startswith(mount):
+                    disk_mounts.add(mount)
+                    break
 
     def do_POST(self):
         """
@@ -42,7 +58,8 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 self.wfile.write('Monitoring is already active\n')
                 return
 
-            multiple_harddrives = os.path.exists("/home/hduser/harddrive2")
+            self._get_mount_points()
+
             monitoring_active = True
             self.monitor(self.client_address[0])
 
@@ -55,6 +72,17 @@ class HTTPHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         return
+
+    def get_disk_stats(self):
+        used = 0
+        total = 0
+        for disk in disk_mounts:
+            usage = psutil.disk_usage(disk)
+            used += usage.used
+            total += usage.total
+
+        total_usage = (used/decimal.Decimal(total))*100
+        return round(total_usage, 1)
 
     def monitor(self, main_server):
         """
@@ -70,18 +98,11 @@ class HTTPHandler(BaseHTTPRequestHandler):
         stats = {}
         stats["cpu_percent"] = psutil.cpu_percent()
         stats["virtual_memory"] = psutil.virtual_memory().percent
-        if multiple_harddrives:
-            hd1 = psutil.disk_usage("/home/hduser/harddrive1")
-            hd2 = psutil.disk_usage("/home/hduser/harddrive2")
-            usage = ((hd1.used + hd2.used)/decimal.Decimal(hd1.total + hd2.total))*100
-            stats["disk_usage"] = round(usage, 1)
-        else:
-            stats["disk_usage"] = psutil.disk_usage("/home/hduser/harddrive").percent
+        stats["disk_usage"] = self.get_disk_stats()
         #send to main server
         url = "http://{}:{}/push-stats".format(main_server, PORT)
         headers = {'content-type': 'application/json'}
         requests.post(url, data=json.dumps(stats), headers=headers)
-
 
 #start up the server
 if __name__ == "__main__":

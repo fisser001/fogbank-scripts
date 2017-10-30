@@ -14,10 +14,14 @@ import socket
 import fcntl
 import requests
 import psutil
+import decimal
+
+from get_hadoop_attributes import get_hadoop_dir, get_slaves
 
 PORT = 12345
 monitoring_active = False
 PATHS = ["/start-monitoring", "/end-monitoring", "/push-stats"]
+disk_mounts = set()
 directory = ""
 
 class HTTPHandler(BaseHTTPRequestHandler):
@@ -42,6 +46,24 @@ class HTTPHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         return json.loads(post_data)
 
+    def _get_mount_points(self):
+        global disk_mounts
+        disk_mounts = set()
+        mount_points = [part.mountpoint for part in psutil.disk_partitions()]
+        mount_points = sorted(mount_points, key=len, reverse=True)
+        dirs = ["dfs.datanode.data.dir", "dfs.namenode.name.dir"]
+
+        for directory in dirs:
+            paths = get_hadoop_dir(directory)
+
+            for path in paths:
+                for mount in mount_points:
+                    if path.startswith(mount):
+                        disk_mounts.add(mount)
+                        break
+
+        print(disk_mounts)
+
     def do_POST(self):
         """
         Handle a HTTP POST message
@@ -64,6 +86,8 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 with open(os.path.join(directory, 'indv_ports_' + stm + '.csv'), 'w') as f:
                     f.write('name,tags,time,value\n')
 
+            self._get_mount_points()
+
             #start monitoring stats
             self.modify_monitoring(PATHS[0])
             monitoring_active = True
@@ -83,7 +107,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
 
         #got here so code hasn't returned from errors
         self._set_headers(200, 'text/html')
-        self.wfile.write('Success')
+        self.wfile.write('Success\n')
 
     def write_stats(self, client, content):
         """
@@ -103,19 +127,9 @@ class HTTPHandler(BaseHTTPRequestHandler):
         """
         Either start or end monitoring. This depends on the path
         """
-        slaves_file = os.path.join(os.environ["HADOOP_HOME"], "etc", "hadoop", "slaves")
-        slaves = []
-        # get the slave hostnames
-        with open(slaves_file) as f:
-            for line in f:
-                line = line.strip()
-                #don't get this node's name if it is in the slaves file
-                if line != os.uname()[1]:
-                    slaves.append(line)
-
         #send a request to all the slaves using threads so the time between
         #each request to the nodes is minimised.
-        for slave in slaves:
+        for slave in get_slaves(True):
             t = Thread(target=self.send_request, args=(slave, path,))
             t.start()
 
@@ -128,6 +142,17 @@ class HTTPHandler(BaseHTTPRequestHandler):
         """
         url = "http://{}:{}{}".format(slave, PORT, path)
         requests.post(url)
+
+    def get_disk_stats(self):
+        used = 0
+        total = 0
+        for disk in disk_mounts:
+            usage = psutil.disk_usage(disk)
+            used += usage.used
+            total += usage.total
+
+        total_usage = (used/decimal.Decimal(total))*100
+        return round(total_usage, 1)
 
     def monitor(self):
         """
@@ -142,7 +167,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
         stats = {}
         stats["cpu_percent"] = psutil.cpu_percent()
         stats["virtual_memory"] = psutil.virtual_memory().percent
-        stats["disk_usage"] = psutil.disk_usage("/").percent
+        stats["disk_usage"] = self.get_disk_stats()
         self.write_stats(os.uname()[1], stats)
 
 #use a threaded server so that it can handle multiple requests at once
