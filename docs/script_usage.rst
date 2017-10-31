@@ -5,9 +5,9 @@ Script Usage
 ============
 This document explains how each script is run and the appropriate uses for the script. 
 
-clean.sh
+clean.py
 *********
-Removes all Hadoop files on all nodes. Also reformats the name node.
+Clears the dfs.datanode.data.dir and hadoop.tmp.dir on all nodes. Also reformats the name node, and clears the dfs.namenode.name.dir.
 
 .. code:: bash
 
@@ -51,8 +51,7 @@ To stop monitoring, send another HTTP POST request:
 
 delete.py
 *********
-This script logs into the slave nodes and deletes the Hadoop folder. 
-
+This script logs into the slave nodes and clears dfs.datanode.data.dir and hadoop.tmp.dir.
 .. code:: bash
 
   ./delete.py
@@ -95,7 +94,7 @@ Repeats a certain Hive query multiple times. Statistics about the cluster is col
 
 See the `automated_queries <docs/6_automated_queries.rst>`_ doc for more details.
 
-ssh_key_copy.sh
+ssh_key_copy.py
 ****************
 Copies the master node's SSH key to the slaves. 
 

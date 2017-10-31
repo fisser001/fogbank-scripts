@@ -43,7 +43,11 @@ Format the drive
 
 Install master’s ssh key on slave nodes
 ---------------------------------------
-On the master node, run the ``ssh_key_copy.sh`` script to allow for password-less ssh. If the slave node's hostname does not start with ``slave``, you will have to modify the script.
+On the master node, run the ``ssh_key_copy.py`` script to allow for password-less ssh.
+
+.. code:: bash
+
+  ./ssh_key_copy.py
 
 Run the command manually using: 
 
@@ -57,6 +61,10 @@ Hostname changes
 ----------------
 Each node's hostname must be unique and the node must know about the other nodes in the cluster. 
 This can be done using the ``modify_etc_host.py`` script. The ``node_ip_hostname.txt`` file must be modified to match your setup, and the information in the txt file should also be appended to the master node's ``/etc/hosts``
+
+.. code:: bash
+
+  ./modify_etc_host.py
 
 The script follows the steps below. You do not have to run these commands if the script has already been run.
 
