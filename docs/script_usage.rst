@@ -15,7 +15,7 @@ Clears the dfs.datanode.data.dir and hadoop.tmp.dir on all nodes. Also reformats
 
 copy_files.py
 **************
-The master node holds the Hadoop configuration files for the slave nodes in ``/usr/local/hadoop/etc/hadoop/slave_conf/``. This script copies those files into the slave nodes. 
+The master node holds the Hadoop configuration files for the slave nodes in ``$HADOOP_HOME/etc/hadoop/slave_conf/``. This script copies those files into the slave nodes. 
 
 .. code:: bash
 
@@ -52,6 +52,7 @@ To stop monitoring, send another HTTP POST request:
 delete.py
 *********
 This script logs into the slave nodes and clears dfs.datanode.data.dir and hadoop.tmp.dir.
+
 .. code:: bash
 
   ./delete.py
