@@ -96,8 +96,8 @@ class HTTPHandler(BaseHTTPRequestHandler):
             #stop monitoring
             self.modify_monitoring(PATHS[1])
             monitoring_active = False
-        else:
-            #parse the JSON object
+        elif monitoring_active:
+            #getting data from slaves
             json_data = self._read_data()
             if json_data is None:
                 return
