@@ -65,12 +65,12 @@ Install protobuf 2.5.0
 
   wget  https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz
   tar -xvzf protobuf-2.5.0.tar.gz 
-  cd protobuf-2.5.0.tar.gz
+  cd protobuf-2.5.0
   sudo ./configure
   sudo make
   sudo make check
   sudo make install
-  protoc –version
+  protoc --version
   sudo ldconfig
 
 Installation
@@ -227,4 +227,153 @@ If you want to go back to using Mapreduce, change the property above to ``mr`` a
 
 .. code:: bash
 
-  export HADOOP_CLASSPATH=""
+  unset HADOOP_CLASSPATH
+  
+==================
+Setting up Tez UI
+==================
+The Tez UI is a webpage that displays data from Tez jobs. It also provides a graphical view of the jobs. The data is collected from the YARN Timeline server. 
+
+Changing XML configuration files
+---------------------------------
+
+Modify ``tez-site.xml``:
+
+.. code:: bash
+
+  vim /usr/local/tez/conf/tez-site.xml
+
+Include the following configuration:
+
+.. code:: xml
+
+    <property>
+     <name>tez.history.logging.service.class</name>
+     <value>org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService</value>
+    </property>
+    
+    <property>
+     <name>tez.tez-ui.history-url.base</name>
+     <value>http://localhost:8080/tez-ui</value>
+    </property>
+
+If using Tez 0.4.x, also include:
+
+.. code:: xml
+
+  <property>
+   <name>tez.yarn.ats.enabled</name>
+   <value>true</value>
+  </property>
+  
+If using Hadoop 2.4.x or 2.5.x, also include: 
+
+.. code:: xml
+
+  <property>
+   <name>tez.allow.disabled.timeline-domains</name>
+   <value>true</value>
+  </property>
+
+Edit ``yarn-site.xml``:
+
+.. code:: bash
+
+  vim /usr/local/hadoop/etc/hadoop/yarn-site.xml
+
+The full list of all the properties for the timeline server can be found `here <http://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/TimelineServer.html#Deployment>`_. But the necessary configuration is given below. 
+
+.. code:: xml
+
+   <property>
+    <name>yarn.timeline-service.enabled</name>
+    <value>true</value>
+   </property>
+   
+   <property>
+    <name>yarn.resourcemanager.system-metrics-publisher.enabled</name>
+    <value>true</value>
+   </property>
+   
+   <property>
+    <name>yarn.timeline-service.generic-application-history.enabled</name>
+    <value>true</value>
+   </property>
+   
+   <property>
+    <name>yarn.timeline-service.http-cross-origin.enabled</name>
+    <value>true</value>
+   </property>
+   
+   <property>
+    <name>yarn.timeline-service.generic-application-history.store-class</name>
+    <value>org.apache.hadoop.yarn.server.applicationhistoryservice.FileSystemApplicationHistoryStore</value>
+   </property>
+
+   <property>
+    <name>yarn.timeline-service.store-class</name>
+    <value>org.apache.hadoop.yarn.server.timeline.LeveldbTimelineStore</value>
+   </property>
+
+The properties below deal with the host running the timeline server. Change from localhost to the hostname if accessing outside the host.
+
+.. code:: xml
+
+   <property>
+    <name>yarn.timeline-service.hostname</name>
+    <value>localhost</value>
+   </property>
+
+   <property>
+    <name>yarn.timeline-service.webapp.address</name>
+    <value>localhost:8188</value>
+   </property>
+
+Restart YARN so the changes are applied.
+
+Setting up webserver
+---------------------
+
+Download Tomcat using:
+
+.. code:: xml
+
+  sudo apt-get update
+  sudo apt-get install tomcat8
+
+Go to the original tez folder and go to the tez-ui folder :
+
+Either ``cd apache-tez-x.y.z-src/tez-ui`` (from the tar.gz file) or ``cd tez/tez-ui`` (from github). 
+
+Modify the config to match the Hadoop hosts:
+
+.. code:: bash
+
+  vim src/main/webapp/config/configs.env
+
+The Resource Manager address needs to be changed if you have configured Hadoop using these docs. The RM is on port 8089 due to a conflict with InfluxDB. Change to the config below and modify the hostname.
+
+.. code:: bash
+
+  rm: "http://hostname:8089"
+
+Create a war package using the command below. The war package will be in the ``target/`` folder.
+
+.. code:: bash
+
+  mvn clean package -DskipTests
+
+Move the war package into the Tomcat folder:
+
+.. code:: bash
+
+  sudo cp target/tez-ui-x.y.z.war /var/lib/tomcat8/webapps/tez-ui.war
+
+Restart Tomcat to deploy the war package:
+
+.. code:: bash
+
+   sudo service tomcat8 restart
+
+Check that it is working by visiting http://localhost:8080/tez-ui/.
+
