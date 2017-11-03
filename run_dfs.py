@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import subprocess
 
-programs = ["faucet.py", "gauge.py", "prometheus", "grafana-server"]
+programs = ["faucet.faucet", "faucet.gauge", "prometheus", "grafana-server"]
 not_running = []
 
 #check if the required programs are running
