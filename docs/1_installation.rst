@@ -7,13 +7,31 @@ Check your yaml file using:
 
 .. code:: bash
 
-  check_faucet_config.py /etc/ryu/faucet.yaml
+  check_faucet_config.py /etc/ryu/faucet/faucet.yaml
   
 To always get the most recent code, clone the github repository.
 
 .. code:: bash
 
   git clone https://github.com/faucetsdn/faucet.git
+
+The steps 1-2 are only required if only the github repository was cloned.
+
+1. Install the code from the github repository:
+
+.. code:: bash
+
+  python3 faucet/setup.py build
+  sudo python3 faucet/setup.py install 
+
+2. Install dependencies:
+
+.. code:: bash
+
+  sudo pip3 install -r faucet/requirements.txt
+  sudo pip3 install -r faucet/test-requirements.txt
+
+It may be necessary to force an installation. Add these flags: ``--upgrade --ignore-installed`` to the pip command
 
 Run the faucet controller using:
 
