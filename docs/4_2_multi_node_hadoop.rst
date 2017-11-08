@@ -54,6 +54,16 @@ Add all the intended slaves in the ``/usr/local/hadoop/etc/hadoop/slaves`` file.
   slave1
   slave2
 
+/usr/local/hadoop/etc/hadoop/masters(on the master)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Add in the secondary name node in the ``/usr/local/hadoop/etc/hadoop/masters`` file. Typically this is a different node from the master, however for simplicity, we're going to run both the name node and the secondary name node in the master.
+
+Modify the file:
+
+.. code:: bash
+
+  master
+
 /usr/local/hadoop/etc/hadoop/hdfs-site.xml (all nodes)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Since there is more than one node, increase the replication factor. Ensure that the replication factor is not higher than the number of slaves/datanodes. 
@@ -63,6 +73,15 @@ Since there is more than one node, increase the replication factor. Ensure that 
   <property>
     <name>dfs.replication</name>
     <value>2</value>
+   </property>
+
+Configure the secondary name node address:
+
+.. code:: xml
+
+   <property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>master:50090</value>
    </property>
 
 /usr/local/hadoop/etc/hadoop/mapred-site.xml (All nodes)
