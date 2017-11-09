@@ -150,6 +150,12 @@ An alternative would be to use the scripts provided in this repository.
 
 Start up components on the master node
 --------------------------------------
+Check that the datapaths are configured properly:
+
+.. code:: bash
+
+  ./check_openflow.py
+
 Start up Faucet and Gauge in the background:
 
 .. code:: bash
@@ -184,11 +190,23 @@ Start up the node utilisation monitor:
 
 Modify the Hadoop slave file (``/usr/local/hadoop/etc/hadoop/slaves``) to include the hostnames of all the data nodes (all the slave nodes)
 
+Check node reachability, java and hadoop versions, and time skew:
+
+.. code:: bash
+  
+  ./check_slaves.py
+
 Start up Hadoop:
 
 .. code:: bash
   
   ./run_dfs.py
+
+Check that the Hadoop daemons are up:
+
+.. code:: bash
+  
+  ./check_hadoop.py
 
 Shutting down components
 -------------------------
