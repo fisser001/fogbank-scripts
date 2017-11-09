@@ -9,22 +9,38 @@ import paramiko
 from get_hadoop_attributes import get_slaves
 
 def exit_with_msg(msg):
+    """
+    Exit the script by printing a message 
+    and non-zero exit code (indicates an error)
+    """
     print(msg)
     sys.exit(1)
 
 def get_java_version(output):
+    """
+    Find the java version from the
+    output of the command 'java -version'
+    """
     ver = re.findall(r'version "(.*)"$', output, re.MULTILINE)
     if ver:
         return ver[0]
     return ""
 
 def get_hadoop_version(output):
+    """
+    Find the hadoop version from the
+    output of the command 'hadoop version'
+    """
     ver = re.findall(r'Hadoop (.*)$', output, re.MULTILINE)
     if ver:
         return ver[0]
     return ""
 
 def add_to_dict(version, host, dic, lock):
+    """
+    Add a host to the version key in a dict.
+    Use a lock to share access to dict.
+    """
     with lock:
         if version == "":
             dic["none"].append(host)
@@ -34,6 +50,10 @@ def add_to_dict(version, host, dic, lock):
             dic[version].append(host)
 
 def run_remote_command(cmd, channel):
+    """
+    Send a command to a remote host using paramiko.Channel.
+    Wait for output by sleeping.
+    """
     channel.send(cmd)
     #wait for the command to execute
     while not channel.recv_ready():
@@ -42,6 +62,7 @@ def run_remote_command(cmd, channel):
     return output.replace('\r', '')
 
 def write_to_file(data, filename):
+    """ Write Java/Hadoop versions to a file. """
     del data["none"]
     fn = os.path.join(os.getcwd(), filename)
     print("Writing to " + fn)
@@ -53,6 +74,7 @@ def write_to_file(data, filename):
             data_file.write("---------------------------------------------------\n")
 
 def check_ping():
+    """ Ping all the slaves and print the result """
     #check ping to all the slaves
     successful_ping = []
     fail_ping = []
@@ -88,6 +110,7 @@ def check_ping():
     print("Sucessfully ping-ed these nodes: " + success)
 
 def check_ssh():
+    """ Try and SSH into the slaves. Must have SSH keys. """
     for slave in get_slaves():
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -111,10 +134,10 @@ def check_ssh():
             exit_with_msg(msg)
 
 def check_java_master():
+    """ Check the java version on the master (this host) """
     process = subprocess.Popen(["java", "-version"], stderr=subprocess.PIPE)
     #java outputs the version info in stderr not stdout for some reason
-    _, stderr = process.communicate()
-    java_ver = get_java_version(stderr)
+    java_ver = get_java_version(process.communicate()[1])
 
     if java_ver == "":
         msg = "Please check if java is installed, using java -version."
@@ -123,9 +146,10 @@ def check_java_master():
     return java_ver
 
 def check_hadoop_master():
+    """ Check the hadoop version on the master (this host) """
+
     process = subprocess.Popen(["hadoop", "version"], stdout=subprocess.PIPE)
-    stdout, _ = process.communicate()
-    hadoop_ver = get_hadoop_version(stdout)
+    hadoop_ver = get_hadoop_version(process.communicate()[0])
 
     if hadoop_ver == "":
         msg = "Please check if Hadoop is installed, and the "\
@@ -135,6 +159,7 @@ def check_hadoop_master():
     return hadoop_ver
 
 def check_slave_vers(slave, java_vers, java_lock, hadoop_vers, hadoop_lock):
+    """ Check the java and hadoop version on an individual slave """
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(hostname=slave, look_for_keys=True)
@@ -161,6 +186,10 @@ def check_slave_vers(slave, java_vers, java_lock, hadoop_vers, hadoop_lock):
     add_to_dict(hadoop_ver, slave, hadoop_vers, hadoop_lock)
 
 def check_java_hadoop_slaves(java_vers, hadoop_vers):
+    """
+    Check the java and hadoop version on all slaves.
+    Uses threads to check slaves in parallel.
+    """
     java_lock = threading.Lock()
     hadoop_lock = threading.Lock()
 
@@ -179,6 +208,10 @@ def check_java_hadoop_slaves(java_vers, hadoop_vers):
         t.join()
 
 def check_versions():
+    """
+    Check the java and hadoop versions of the master 
+    (this host) and the slave nodes. Write the results to a file.
+    """
     java_ver = check_java_master()
     java_vers = {java_ver : [os.uname()[1]], "none" : []}
     hadoop_ver = check_hadoop_master()
@@ -202,9 +235,10 @@ def check_versions():
     write_to_file(hadoop_vers, "hadoop_ver.txt")
 
 def check_time_skew():
-    process = subprocess.Popen(["which", "clockdiff"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, _ = process.communicate()
-    if stdout == "":
+    """ Check the time difference between this host and the slaves """
+
+    process = subprocess.Popen(["which", "clockdiff"], stdout=subprocess.PIPE)
+    if process.communicate()[0] == "":
         msg = "Need clockdiff to calculate time skew." \
               "Please install using sudo apt install iputils-clockdiff"
         exit_with_msg(msg)
@@ -213,6 +247,7 @@ def check_time_skew():
     print("------------------------")
     time_threshold = 20000 #20 seconds of time skew allowed
     above_threshold = False
+
     for slave in get_slaves():
         process = subprocess.Popen(["clockdiff", "-o", slave],
                                    stdout=subprocess.PIPE,
