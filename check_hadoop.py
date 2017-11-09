@@ -1,8 +1,8 @@
+#!/usr/bin/env python
 import os
 import subprocess
-import paramiko
 import socket
-import sys 
+import sys
 
 from get_hadoop_attributes import get_slaves
 
@@ -34,13 +34,15 @@ rm_host = run_cmd(hdfs_location + " getconf -confKey yarn.resourcemanager.hostna
 rm_host = rm_host.strip()
 
 if rm_host == "":
-    exit_with_msg("Please configure your Resource Manager host by changing the yarn.resourcemanager.hostname property in yarn-site.xml")
+    exit_with_msg("Please configure your Resource Manager host by changing "\
+                  "the yarn.resourcemanager.hostname property in yarn-site.xml")
 
 try:    
     rm_hostname = socket.gethostbyaddr(rm_host)[0]
 except socket.herror as err:
     msg = "Received error: " + err[1]
-    msg += ". Please check that you have defined a yarn.resourcemanager.hostname property in yarn-site.xml."
+    msg += ". Please check that you have defined a "
+    msg += "yarn.resourcemanager.hostname property in yarn-site.xml."
     exit_with_msg(msg)
 
 jps_to_check = run_cmd("ssh "+ rm_hostname +" jps")
@@ -53,8 +55,9 @@ snn_host = run_cmd(hdfs_location + " getconf -secondaryNameNodes")
 snn_host = snn_host.strip()
 ssn_err_msg = "The secondary name node is not configured.\n"\
               "In the Hadoop configuration directory, please make a new file called masters. "\
-              "Then add in this node's hostname.\nAlso modify hdfs-site.xml, and add in a property "\
-              "with the name dfs.secondary.http.address, and the value of hostname:50090"
+              "Then add in this node's hostname.\n"\
+              "Also modify hdfs-site.xml, and add in a property with the name "\
+              "dfs.secondary.http.address, and the value of hostname:50090"
 
 if snn_host == "":
     exit_with_msg(snn_err_msg)
