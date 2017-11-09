@@ -192,7 +192,7 @@ Then restart Hadoop:
 ===========
 Running Tez
 ===========
-Test if the installation was successful using the word count example in the `Single Node Hadoop Word Count <docs/4_1_single_node_hadoop.rst#running-word-count>`_. 
+Test if the installation was successful using the word count example in the `Single Node Hadoop Word Count </docs/4_1_single_node_hadoop.rst#running-word-count>`_. 
 
 Run with this command instead:
 
