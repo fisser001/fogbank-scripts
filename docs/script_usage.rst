@@ -88,7 +88,7 @@ generate_graphs.py
 *******************
 Used with run_multiple_queries.py to generate graphs from statistics collected during a query.
 
-See the `automated_queries <docs/6_automated_queries.rst#generate-graphs-from-the-data>`_ doc for more details.
+See the `automated_queries <6_automated_queries.rst#generate-graphs-from-the-data>`_ doc for more details.
 
 kill_dfs.sh
 ************
@@ -142,7 +142,7 @@ run_multiple_queries.py
 ************************
 Repeats a certain Hive query multiple times. Statistics about the cluster is collected then graphed.
 
-See the `automated_queries <docs/6_automated_queries.rst>`_ doc for more details.
+See the `automated_queries <6_automated_queries.rst>`_ doc for more details.
 
 ssh_key_copy.py
 ****************
