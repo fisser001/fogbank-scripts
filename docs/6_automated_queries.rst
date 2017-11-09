@@ -1,7 +1,7 @@
 Running automated Hive queries
 ==============================
 
-The automated collection of statistics during a task is done through the `run_multiple_queries.py <run_multiple_queries.py>`_ script. It runs a Hive query multiple times, and generates graphs from the statistics collected during the query. 
+The automated collection of statistics during a task is done through the `run_multiple_queries.py </run_multiple_queries.py>`_ script. It runs a Hive query multiple times, and generates graphs from the statistics collected during the query. 
 This script is run using:
 
 .. code:: bash
@@ -30,7 +30,7 @@ The script obtains the statistics from the InfluxDB database written to by Gauge
 
 Each statistic has two CSV files generated from it: indv_port and all_ports. indv_port indicates that the CSV file contains data about each individual port, while all_ports aggregate the data network wide. 
 
-It also obtains node utilisation statistics using `cpu_ram_monitor.py <cpu_ram_monitor.py>`_ and `cpu_ram_monitor_main.py <cpu_ram_monitor_main.py>`_. These statistics are: 
+It also obtains node utilisation statistics using `cpu_ram_monitor.py </cpu_ram_monitor.py>`_ and `cpu_ram_monitor_main.py </cpu_ram_monitor_main.py>`_. These statistics are: 
 
 - cpu_percent (CPU utilisation of each node in a percentage format)
 - disk_usage (Disk usage of each node in percent)
@@ -40,7 +40,7 @@ The timestamps in the all of CSV files are in nanoseconds.
 
 Generate graphs from the data
 ------------------------------
-After the data has been collected and the query has been repeated by the specified amount, graphs are generated from the data. This functionality is from `generate_graphs.py <generate_graphs.py>`_, which can be run independently as:
+After the data has been collected and the query has been repeated by the specified amount, graphs are generated from the data. This functionality is from `generate_graphs.py </generate_graphs.py>`_, which can be run independently as:
 
 .. code:: bash
 
