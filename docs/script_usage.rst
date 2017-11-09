@@ -5,6 +5,33 @@ Script Usage
 ============
 This document explains how each script is run and the appropriate uses for the script. 
 
+check_hadoop.py
+***************
+Checks whether the required Hadoop daemons are running. The name node, secondary name node, resource manager, data node, and node manager daemons must be running on their respective hosts. 
+
+.. code:: bash
+
+  ./check_hadoop.py
+
+check_openflow.py
+*****************
+Check the OpenFlow datapaths configuration. Checks that a datapath connects to TCP port 6653 and 6654 simultaneously. Also saves the port information to a file, so this can be used to configure Faucet. 
+
+.. code:: bash
+
+  ./check_openflow.py
+
+check_slaves.py
+***************
+Check if we can run Hadoop on the cluster. Checks that the nodes are reachable through SSH and ping. Also checks the versions of java and hadoop. The results are written to text files. 
+
+The time difference between the master node and the slave node is also checked. The difference should be no more than 20 seconds. 
+
+
+.. code:: bash
+
+  ./check_slaves.py
+
 clean.py
 *********
 Clears the dfs.datanode.data.dir and hadoop.tmp.dir on all nodes. Also reformats the name node, and clears the dfs.namenode.name.dir.
@@ -78,6 +105,28 @@ Change the contents of /etc/hosts to match the contents of node_ip_hostname.txt.
 .. code:: bash
 
   ./modify_etc_host.py
+
+of_switch_check.py
+******************
+Ryu controller used to check the datapath configuration in check_openflow.py. The connected datapaths' number of tables and port information is stored by this controller. This information can be obtained using:
+
+.. code:: bash
+
+  curl http://localhost:8080/get_all
+
+The actual controller can be run using:
+
+.. code:: bash
+
+  ryu-manager of_switch_check.py
+
+The default REST API sits on port 8080, but this can be changed by instead running:
+
+.. code:: bash
+
+  ryu-manager --wsapi-port 8081 of_switch_check.py
+
+Change 8081 to the desired port number. 
 
 run_dfs.py
 ***********
