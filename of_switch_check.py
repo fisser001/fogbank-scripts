@@ -3,12 +3,13 @@ from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 
+#imports for REST API
 from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from webob import Response
 import json
 
 class OFSwitchCheck(app_manager.RyuApp):
-    
+
     _CONTEXTS = {'wsgi': WSGIApplication}
 
     def __init__(self, *args, **kwargs):
@@ -42,7 +43,7 @@ class OFSwitchCheck(app_manager.RyuApp):
 
 
 class OFCheckAPI(ControllerBase):
-    
+
     def __init__(self, req, link, data, **config):
         super(OFCheckAPI, self).__init__(req, link, data, **config)
         self.of_app = data["of_app"]
@@ -51,4 +52,3 @@ class OFCheckAPI(ControllerBase):
     def get_all_info(self, req, **kwargs):
         body = json.dumps(self.of_app.datapaths).encode('utf-8')
         return Response(content_type='application/json', body=body)
-
