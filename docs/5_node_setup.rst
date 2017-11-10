@@ -190,6 +190,12 @@ Start up the node utilisation monitor:
 
 Modify the Hadoop slave file (``/usr/local/hadoop/etc/hadoop/slaves``) to include the hostnames of all the data nodes (all the slave nodes)
 
+Copy the Hadoop config files into the new nodes:
+
+.. code:: bash
+  
+  ./copy_files.py
+
 Check node reachability, java and hadoop versions, and time skew:
 
 .. code:: bash
