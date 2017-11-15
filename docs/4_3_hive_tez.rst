@@ -70,8 +70,8 @@ Install protobuf 2.5.0
   sudo make
   sudo make check
   sudo make install
-  protoc --version
   sudo ldconfig
+  protoc --version
 
 Installation
 -------------
