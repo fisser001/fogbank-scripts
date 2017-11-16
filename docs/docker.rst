@@ -168,7 +168,7 @@ Instead of pulling the image from the Docker Hub, you can also build the image f
 
 .. code:: bash
 
-  docker build -t hadoop-docker -f Dockerfile
+  docker build -t hadoop-docker -f Dockerfile .
 
 =========================
 Useful Docker commands
