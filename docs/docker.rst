@@ -1,3 +1,5 @@
+.. contents:: Table of Contents
+  :depth: 2
 =============
 Using Docker
 =============
@@ -183,3 +185,11 @@ Useful Docker commands
 +-------------------------------------------+---------------------------------------------------------------------------------------------------------+
 | ``docker network inspect <network name>`` | Shows details about the network (e.g. what containers are attached, the IP addresses of the containers) |
 +-------------------------------------------+---------------------------------------------------------------------------------------------------------+
+
+**NOTE**
+
+Docker may be prone to hoarding, so you may end up losing a lot of disk space. Run the following command to remove unecessary files:
+
+.. code:: bash
+
+  docker system prune
