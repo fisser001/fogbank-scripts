@@ -10,6 +10,7 @@ RUN wget https://archive.apache.org/dist/hadoop/common/hadoop-2.8.0/hadoop-2.8.0
     mv hadoop-2.8.0/ /usr/local/hadoop
 
 # Setup Hadoop environment variables
+ENV HADOOP_VER=2.8.0
 ENV HADOOP_HOME=/usr/local/hadoop
 ENV HADOOP_MAPRED_HOME=$HADOOP_HOME
 ENV HADOOP_COMMON_HOME=$HADOOP_HOME
@@ -22,7 +23,7 @@ ENV HADOOP_OPTS="-Djava.library.path=$HADOOP_INSTALL/lib/native"
 ENV CLASSPATH=$CLASSPATH:/usr/local/hadoop/lib/*:.
 
 # Move Hadoop config files
-COPY hadoop_conf/ conf/
+COPY hadoop_conf/ hadoop_conf/
 RUN cp conf/* /usr/local/hadoop/etc/hadoop/
 
 RUN mkdir -p /usr/local/hadoop/logs
@@ -43,3 +44,4 @@ EXPOSE 50075 50475 50010 1019 50020
 
 # Expose MapReduce ports
 EXPOSE 50030 8021 50060 51111
+
