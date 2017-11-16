@@ -1,0 +1,77 @@
+FROM libunamari/hadoop
+
+# Get Hive
+RUN wget http://www-us.apache.org/dist/hive/hive-2.1.1/apache-hive-2.1.1-bin.tar.gz && \
+    tar xvzf apache-hive-2.1.1-bin.tar.gz && \
+    rm apache-hive-2.1.1-bin.tar.gz && \
+    mv apache-hive-2.1.1-bin/ /usr/local/hive
+
+# Hive environment variables
+ENV HIVE_HOME=/usr/local/hive
+ENV PATH=$PATH:$HIVE_HOME/bin
+ENV CLASSPATH=$CLASSPATH:/usr/local/hive/lib/*:.
+
+# overwrite the hive config
+COPY hive_conf/ hive_conf/
+RUN cp hive_conf/* /usr/local/hive/conf/
+
+# get Derby
+RUN wget http://www-us.apache.org/dist//db/derby/db-derby-10.13.1.1/db-derby-10.13.1.1-lib.tar.gz && \
+    tar xvzf db-derby-10.13.1.1-lib.tar.gz && \
+    rm db-derby-10.13.1.1-lib.tar.gz && \
+    mv db-derby-10.13.1.1-lib /usr/local/derby && \
+    mkdir /usr/local/derby/data
+
+#derby environment variables
+ENV DERBY_HOME=/usr/local/derby
+ENV PATH=$PATH:$DERBY_HOME/bin
+ENV CLASSPATH=$CLASSPATH:$DERBY_HOME/lib/derby.jar:$DERBY_HOME/lib/derbytools.jar
+
+RUN schematool -dbType derby -initSchema
+
+#tez
+RUN apt-get -y install maven build-essential git && \
+    wget  https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz && \
+    tar xvzf protobuf-2.5.0.tar.gz && \
+    rm protobuf-2.5.0.tar.gz && \
+    cd protobuf-2.5.0 && \
+    ./configure && \
+    make && \
+    make check && \
+    make install && \
+    ldconfig && \
+    protoc --version && \
+    cd ..
+
+ENV TEZ_HOME=/usr/local/tez
+ENV TEZ_CONF_DIR=$TEZ_HOME/conf
+ENV TEZ_JARS="$TEZ_HOME"
+ENV HIVE_AUX_JARS_PATH="$TEZ_JARS"
+ENV HADOOP_CLASSPATH=${TEZ_CONF_DIR}:${TEZ_JARS}/*:${TEZ_JARS}/lib/*
+
+COPY tez_conf/ /tez_conf/
+
+RUN wget http://www-us.apache.org/dist/tez/0.9.0/apache-tez-0.9.0-src.tar.gz && \
+    tar xvzf apache-tez-0.9.0-src.tar.gz && \
+    cd /tez_conf/ && \
+    javac ModifyHadoopVer.java && \
+    java ModifyHadoopVer /apache-tez-0.9.0-src/pom.xml && \
+    cd /apache-tez-0.9.0-src && \
+    echo '{ "allow_root": true }' > /root/.bowerrc && \
+    mvn clean package -DskipTests=true -Dmaven.javadoc.skip=true
+
+RUN mkdir $TEZ_HOME && \
+    tar xvzf /apache-tez-0.9.0-src/tez-dist/target/tez-0.9.0-minimal.tar.gz -C $TEZ_HOME && \ 
+    mkdir $TEZ_HOME/conf && \
+    cp /tez_conf/tez-site.xml $TEZ_HOME/conf
+
+RUN cd / && \
+    wget http://www.stats.govt.nz/~/media/Statistics/Browse%20for%20stats/DwellingHouseholdEstimates/HOTPSep17qtr/dhe-sep17qtr-tables-csv.csv 
+
+COPY start_up.sh /
+ENTRYPOINT ["start_up.sh"]
+
+
+
+
+
