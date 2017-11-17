@@ -166,7 +166,7 @@ Then type in a query to perform on the new table. For this example, the max valu
 ================================================
 Running Docker containers on different machines
 ================================================
-This section explains how Docker can be used in a cluster. These instructions are based on the official Docker `standalone swarm instructions <https://docs.docker.com/engine/userguide/networking/overlay-standalone-swarm/>`_. 
+This section explains how Docker can be used in a cluster. These instructions are based on the official Docker `standalone swarm instructions <https://docs.docker.com/engine/userguide/networking/overlay-standalone-swarm/>`_. We are going to create a standalone swarm using an overlay network. This allows Docker containers to commmunicate despite being on different machines.
 
 From the official Docker page: "An overlay network requires a key-value store. The key-value store holds information about the network state which includes discovery, networks, endpoints, IP addresses, and more. Docker supports Consul, Etcd, and ZooKeeper key-value stores."
 
