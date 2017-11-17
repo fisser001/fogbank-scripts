@@ -42,6 +42,41 @@ For the "Configuring Hive Metastore" step, also modify the existing properties i
     <value>true</value>
   </property>
 
+Testing Hive
+-------------
+Grab a CSV file. For this example, the CSV file is obtained from StatisticsNZ.
+
+.. code:: xml
+  
+  wget http://www.stats.govt.nz/~/media/Statistics/Browse%20for%20stats/DwellingHouseholdEstimates/HOTPSep17qtr/dhe-sep17qtr-tables-csv.csv
+
+Start up the Hive shell
+
+.. code:: bash
+
+  beeline -u jdbc:hive2://
+
+Load in the sample csv into Hive. First create a table:
+
+.. code:: sql
+
+ CREATE TABLE sample_data 
+ (type STRING, tenure STRING, period STRING, value INT) 
+ row format delimited fields terminated by ','
+ tblproperties("skip.header.line.count"="1");
+
+Then load the csv into the table
+
+.. code:: sql
+
+ LOAD DATA LOCAL INPATH 'dhe-sep17qtr-tables-csv.csv' OVERWRITE INTO TABLE sample_data;
+
+Then type in a query to perform on the new table. For this example, the max value was queried.
+
+.. code:: sql
+ 
+ SELECT max(value) FROM sample_data;
+
 Notes
 ------
 If the query is running quite slowly, there might be a way to improve it. Check if the query falls under these `categories <https://docs.treasuredata.com/articles/performance-tuning>`_.  
