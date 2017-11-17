@@ -24,7 +24,7 @@ ENV CLASSPATH=$CLASSPATH:/usr/local/hadoop/lib/*:.
 
 # Move Hadoop config files
 COPY hadoop_conf/ hadoop_conf/
-RUN cp conf/* /usr/local/hadoop/etc/hadoop/
+RUN cp hadoop_conf/* /usr/local/hadoop/etc/hadoop/
 
 RUN mkdir -p /usr/local/hadoop/logs
 

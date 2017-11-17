@@ -69,7 +69,7 @@ RUN cd / && \
     wget http://www.stats.govt.nz/~/media/Statistics/Browse%20for%20stats/DwellingHouseholdEstimates/HOTPSep17qtr/dhe-sep17qtr-tables-csv.csv 
 
 COPY start_up.sh /
-ENTRYPOINT ["start_up.sh"]
+ENTRYPOINT ["/bin/bash"]
 
 
 
