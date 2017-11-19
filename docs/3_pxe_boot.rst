@@ -277,7 +277,7 @@ Change the file permissions:
 
 .. code:: bash
 
-  cmod 777 -R /var/lib/tftpboot/xubuntu_hadoop
+  chmod 777 -R /var/lib/tftpboot/xubuntu_hadoop
 
 Restart all the services. Alternatively, you can just reboot.
 
